@@ -15,8 +15,10 @@
   Access-Control-Allow-Methods: GET
   Access-Control-Max-Age: 86400
 
+# 非哈希资源（HTML 等）每次回源校验，部署后立刻能拿到新页面；
+# 带哈希的 /_astro/*、/assets/*、/images/*、*.woff2 在下面单独改回 immutable。
 /*
-  Cache-Control: public, max-age=3600, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate
   X-Content-Type-Options: nosniff
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
