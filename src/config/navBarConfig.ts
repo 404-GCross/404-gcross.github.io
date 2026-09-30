@@ -142,6 +142,13 @@ export const navBarConfig: NavBarConfig = {
 			icon: "material-symbols:devices",
 		},
 
+		// 项目页
+		{
+			name: "项目",
+			url: "/projects/",
+			icon: "material-symbols:work",
+		},
+
 		// 自定义一级下拉菜单：关于
 		{
 			name: "关于",
@@ -152,11 +159,6 @@ export const navBarConfig: NavBarConfig = {
 					name: "关于本站",
 					url: "/about/",
 					icon: "material-symbols:person",
-				},
-				{
-					name: "项目",
-					url: "/projects/",
-					icon: "material-symbols:work",
 				},
 				{
 					name: "隐私说明",
