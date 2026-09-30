@@ -23,7 +23,7 @@
 | `shirones/content/moments/` | 日记目录（本站已关闭日记，仅留占位） |
 | `shirones/content/spec/about.md` | 「关于」页内容 |
 | `src/pages/privacy.astro` | 站点自有的「隐私说明」页（主题没有此页） |
-| `src/components/` | 覆盖主题组件的目录：`system/ConfigCarrier.astro`（挂载 Clarity + 站点级下拉菜单样式微调）、`molecules/SiteStats.astro`（关闭日记后隐藏「动态」统计行）、`organisms/Profile.astro`（让社交链接支持自备图片 logo） |
+| `src/components/` | 覆盖主题组件的目录：`system/ConfigCarrier.astro`（挂载 Clarity + 站点级样式微调）、`molecules/SiteStats.astro`（关闭日记后隐藏「动态」统计行）、`organisms/Profile.astro`（让社交链接支持自备图片 logo） |
 | `public/` | 静态资源：banner、设备图、项目封面、favicon、`_headers` |
 | `.github/workflows/` | 三个 CI workflow |
 
@@ -38,8 +38,13 @@
   游戏、站点罗盘、系列。
 - **访问统计**是 Microsoft Clarity（`yqdo4s8yn8`），通过覆盖 `src/components/system/ConfigCarrier.astro`
   注入：尊重 DNT，首次交互或 10 秒后才加载。主题自带的 umami 配置保持关闭。
-- **站点级样式微调**也挂在 `ConfigCarrier.astro`（它只渲染一次）：目前只有一条，
-  让「关于」下拉按内容撑宽，避免长条目折行。
+- **站点级样式微调**也挂在 `ConfigCarrier.astro`（它只渲染一次）：目前两条 —— 让「关于」下拉按内容撑宽、
+  避免长条目折行；把 `--banner-stage-height` 拉到 `100vh`，让页面背景回到全屏壁纸。
+  主题只有 `banner`（桌面首页 65vh）/ `none` 两种背景，没有 Mizuki 的 `fullscreen`/`overlay`，
+  所以用 `:root:root` 提高优先级压过主题媒体查询里的 `:root`。
+- **缓存策略**写在 `public/_headers`：非哈希资源（HTML 等）是 `max-age=0, must-revalidate`，
+  部署后立刻生效；带哈希的 `/_astro/*`、`/assets/*`、`/images/*`、`*.woff2` 用 `! Cache-Control`
+  单独改成 `immutable`。GitHub Pages 不支持 `_headers`，这些头只在 Cloudflare 侧生效。
 - 主题没有通用 head 注入点；若升级后统计失效，优先检查 ConfigCarrier 是否被上游改名。
 
 ## 提交信息规范
