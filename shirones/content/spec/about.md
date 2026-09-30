@@ -27,6 +27,10 @@ Hi，我是 **川宇不是GCross**，欢迎来到 **404**。
 
 ::github{repo="LyraVoid/Shirone"}
 
+本站的配置、内容与静态资源都开源在这个仓库里：
+
+::github{repo="404-GCross/404-gcross.github.io"}
+
 ---
 
 *Just for fun ✨*
