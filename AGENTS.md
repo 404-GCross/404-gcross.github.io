@@ -23,7 +23,7 @@
 | `shirones/content/moments/` | 日记目录（本站已关闭日记，仅留占位） |
 | `shirones/content/spec/about.md` | 「关于」页内容 |
 | `src/pages/privacy.astro` | 站点自有的「隐私说明」页（主题没有此页） |
-| `src/components/` | 覆盖主题组件的目录：`system/ConfigCarrier.astro`（挂载 Clarity）、`molecules/SiteStats.astro`（关闭日记后隐藏「动态」统计行） |
+| `src/components/` | 覆盖主题组件的目录：`system/ConfigCarrier.astro`（挂载 Clarity）、`molecules/SiteStats.astro`（关闭日记后隐藏「动态」统计行）、`organisms/Profile.astro`（让社交链接支持自备图片 logo） |
 | `public/` | 静态资源：banner、设备图、项目封面、favicon、`_headers` |
 | `.github/workflows/` | 三个 CI workflow |
 
@@ -31,6 +31,8 @@
 
 - **图片一律用 public 绝对路径**（如 `/images/device/xxx.webp`）。package 模式下主题只会在自己的
   包里解析相对路径，写在 `src/assets/...` 的相对路径会指到主题自带图片。
+- **社交链接的图片 logo**：主题的 `profileConfig.links` 只支持 iconify 图标名，写图片需要走
+  `src/components/organisms/Profile.astro` 这份覆盖（links 里额外支持可选的 `image` 字段）。
 - **关闭页面**要两处同时改：对应配置里的 `enable: false`（导航自动裁剪），以及
   `astro.config.mjs` 的 `excludeRoutes`（不产出路由）。当前关闭：日记、番剧、相册、技能、时间线、
   游戏、站点罗盘、系列。
