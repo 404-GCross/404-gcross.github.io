@@ -229,13 +229,15 @@ const bannerOffset =
 
 		data-overlayscrollbars-initialize
 	>
-		<noscript
-			><iframe
-				src="https://www.googletagmanager.com/ns.html?id=GTM-KRX3XGVH"
-				height="0"
-				width="0"
-				style="display:none;visibility:hidden"></iframe></noscript
-		>
+		{siteConfig.thirdPartyAnalytics?.gtmId && (
+			<noscript
+				><iframe
+					src={`https://www.googletagmanager.com/ns.html?id=${siteConfig.thirdPartyAnalytics.gtmId}`}
+					height="0"
+					width="0"
+					style="display:none;visibility:hidden"></iframe></noscript
+			>
+		)}
 		<!-- 页面顶部渐变高光效果 - 只在full和semifull模式下显示 -->
 		{shouldShowTopHighlight && <div class="top-gradient-highlight" />}
 
