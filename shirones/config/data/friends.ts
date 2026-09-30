@@ -15,7 +15,16 @@ export interface FriendItem {
 }
 
 // 友情链接数据
-export const friendsData: FriendItem[] = [];
+export const friendsData: FriendItem[] = [
+	{
+		id: 1,
+		title: "xm486の小窝",
+		imgurl: "https://xm486.zh.kg/image/favicon-128.png",
+		desc: "xm486の小窝，技术宅拯救世界!",
+		siteurl: "https://xm486.zh.kg/",
+		tags: [],
+	},
+];
 
 // 获取所有友情链接数据（稳定顺序，测试可复现）
 export function getFriendsList(): FriendItem[] {
