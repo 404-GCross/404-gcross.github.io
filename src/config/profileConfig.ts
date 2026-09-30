@@ -23,6 +23,7 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "Kungal 论坛",
 			icon: "material-symbols:forum",
+			image: "/images/social/kungal.webp",
 			url: "https://www.kungal.com/user/1922",
 		},
 	],
