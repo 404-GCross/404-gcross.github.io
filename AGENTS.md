@@ -47,9 +47,12 @@
   而是读 `shirones/config/siteConfig.ts` 里本地扩展的 `siteStartDate`（主题类型没有这个字段，
   消费侧断言取用），按站点时区 `timeZone` 的自然日算「第 N 天」；覆盖版
   `src/components/molecules/SiteStats.astro` 在页面加载时再算一次，不重新部署也会每天 +1。
-- **缓存策略**写在 `public/_headers`：非哈希资源（HTML 等）是 `max-age=0, must-revalidate`，
-  部署后立刻生效；带哈希的 `/_astro/*`、`/assets/*`、`/images/*`、`*.woff2` 用 `! Cache-Control`
-  单独改成 `immutable`。GitHub Pages 不支持 `_headers`，这些头只在 Cloudflare 侧生效。
+- **缓存策略**写在 `public/_headers`：只有 Astro 产出、文件名带内容哈希的 `/_astro/*` 用
+  `! Cache-Control` 改成 `immutable`；其余（HTML 与 `public/` 下的图片、横幅、favicon 等
+  固定文件名资源，字体 woff2 也在 `/_astro/` 下）都是 `max-age=0, must-revalidate`，
+  部署后立刻生效。**别再给固定文件名的资源加 `immutable`**：就地替换同名图片时，
+  已经缓存过的浏览器一年内都不会回源（`images/device/rog-zephyrus-g14-air-2025-v2.webp`
+  就是为此改名的）。GitHub Pages 不支持 `_headers`，这些头只在 Cloudflare 侧生效。
 - 主题没有通用 head 注入点；若升级后统计失效，优先检查 ConfigCarrier 是否被上游改名。
 
 ## 提交信息规范

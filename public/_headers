@@ -15,8 +15,10 @@
   Access-Control-Allow-Methods: GET
   Access-Control-Max-Age: 86400
 
-# 非哈希资源（HTML 等）每次回源校验，部署后立刻能拿到新页面；
-# 带哈希的 /_astro/*、/assets/*、/images/*、*.woff2 在下面单独改回 immutable。
+# 只有 Astro 产出的、文件名自带内容哈希的 /_astro/* 用 immutable；
+# 其余一律每次回源校验，部署后立刻能拿到新内容——public 下的图片、横幅、
+# favicon 都是固定文件名，就地替换同名文件在 immutable 下永远传不到老访客
+# （曾因此让「幻14」卡片一直显示被裁的旧图）。字体 woff2 也都在 /_astro/ 下。
 /*
   Cache-Control: public, max-age=0, must-revalidate
   X-Content-Type-Options: nosniff
@@ -27,17 +29,5 @@
   Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://www.clarity.ms https://scripts.clarity.ms https://code.iconify.design; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https: http:; font-src 'self' data:; connect-src 'self' https:; frame-src 'self' https:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'
 
 /_astro/*
-  ! Cache-Control
-  Cache-Control: public, max-age=31536000, immutable
-
-/assets/*
-  ! Cache-Control
-  Cache-Control: public, max-age=31536000, immutable
-
-/images/*
-  ! Cache-Control
-  Cache-Control: public, max-age=31536000, immutable
-
-/*.woff2
   ! Cache-Control
   Cache-Control: public, max-age=31536000, immutable
