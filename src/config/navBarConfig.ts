@@ -135,6 +135,13 @@ export const navBarConfig: NavBarConfig = {
 		// 预设链接：友链
 		LinkPreset.Friends,
 
+		// 设备页
+		{
+			name: "设备",
+			url: "/devices/",
+			icon: "material-symbols:devices",
+		},
+
 		// 自定义一级下拉菜单：关于
 		{
 			name: "关于",
@@ -145,11 +152,6 @@ export const navBarConfig: NavBarConfig = {
 					name: "关于本站",
 					url: "/about/",
 					icon: "material-symbols:person",
-				},
-				{
-					name: "设备",
-					url: "/devices/",
-					icon: "material-symbols:devices",
 				},
 				{
 					name: "项目",
