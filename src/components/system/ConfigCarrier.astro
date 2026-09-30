@@ -29,6 +29,9 @@ const textureOptions = resolveTextureOptions();
 	   用 :root:root:has(...) 把横幅舞台拉到 100vh，且**只在首页生效**，
 	   其他页面保持主题默认的 65vh。body 的 data-current-page 由主题在 Swup
 	   导航时同步更新，所以站内切页后这条规则会自动失效/生效。
+	3) 设备卡片只留名称/品牌/年份/状态/图片/按钮，隐藏规格行与简评。
+	   数据仍保留在 shirones/config/data/devices.ts（DeviceItem 里 specs /
+	   description 是必填字段，删了过不了类型检查，且设备页搜索会用到它们）。
 -->
 <style is:global>
 	.top-app-bar__submenu {
@@ -42,6 +45,12 @@ const textureOptions = resolveTextureOptions();
 
 	:root:root:has(body[data-current-page="home"]) {
 		--banner-stage-height: 100vh;
+	}
+
+	/* :root:root 压过 Svelte 编译出来的 .device-card__specs.svelte-xxx */
+	:root:root .device-card__specs,
+	:root:root .device-card__description {
+		display: none;
 	}
 </style>
 
