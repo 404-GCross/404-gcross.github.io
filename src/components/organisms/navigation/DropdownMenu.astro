@@ -46,11 +46,20 @@ const hasChildren = children.length > 0;
 					aria-haspopup="true"
 					data-dropdown-trigger
 				>
-					{link.icon && (
-						<Icon
-							name={link.icon}
-							class="text-[1.1rem] lg:mr-2 flex-shrink-0"
+					{link.image ? (
+						<img
+							src={link.image}
+							alt=""
+							class="w-[1.1rem] h-[1.1rem] object-contain lg:mr-2 flex-shrink-0"
+							loading="lazy"
 						/>
+					) : (
+						link.icon && (
+							<Icon
+								name={link.icon}
+								class="text-[1.1rem] lg:mr-2 flex-shrink-0"
+							/>
+						)
 					)}
 					<span class="truncate hidden lg:inline">
 						{getLocalizedName(link.name)}
@@ -78,11 +87,20 @@ const hasChildren = children.length > 0;
 								aria-label={child.name}
 							>
 								<div class="flex items-center">
-									{child.icon && (
-										<Icon
-											name={child.icon}
-											class="text-[1rem] mr-2"
+									{child.image ? (
+										<img
+											src={child.image}
+											alt=""
+											class="w-4 h-4 object-contain mr-2"
+											loading="lazy"
 										/>
+									) : (
+										child.icon && (
+											<Icon
+												name={child.icon}
+												class="text-[1rem] mr-2"
+											/>
+										)
 									)}
 									<span>{getLocalizedName(child.name)}</span>
 								</div>

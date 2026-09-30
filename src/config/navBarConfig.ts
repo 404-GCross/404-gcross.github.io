@@ -189,6 +189,7 @@ export const navBarConfig: NavBarConfig = {
 					url: "https://www.kungal.com/user/1922",
 					external: true,
 					icon: "material-symbols:forum",
+					image: "/images/social/kungal.webp",
 				},
 			],
 		},
