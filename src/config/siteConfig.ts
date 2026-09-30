@@ -190,12 +190,9 @@ export const siteConfig: SiteConfig = {
 	showCoverInContent: true, // 在文章内容页显示文章封面
 	generateOgImages: false, // 启用生成OpenGraph图片功能,注意开启后要渲染很长时间，不建议本地调试的时候开启
 	favicon: [
-		// 留空以使用默认 favicon
-		// {
-		//   src: '/favicon/icon.png',    // 图标文件路径
-		//   theme: 'light',              // 可选，指定主题 'light' | 'dark'
-		//   sizes: '32x32',              // 可选，图标大小
-		// }
+		{ src: "/favicon/favicon.svg", sizes: "any" },
+		{ src: "/favicon/favicon.ico", sizes: "32x32" },
+		{ src: "/favicon/favicon-192.png", sizes: "192x192" },
 	],
 
 	showLastModified: true, // 控制"上次编辑"卡片显示的开关
