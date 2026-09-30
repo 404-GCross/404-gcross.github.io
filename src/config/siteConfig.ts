@@ -5,7 +5,7 @@ const SITE_LANG = "zh_CN"; // 语言代码，例如：'en', 'zh_CN', 'ja' 等。
 
 export const siteConfig: SiteConfig = {
 	title: "御影小站",
-	subtitle: "Just for fun",
+	subtitle: "欢迎来到川宇不是GCross的个人站点",
 	siteURL: "https://gcross.pages.dev/", // 请替换为你的站点URL，以斜杠结尾
 	siteStartDate: "2026-09-30", // 站点开始运行日期，用于站点统计组件计算运行天数
 	timeZone: "Asia/Shanghai", // 文章日期使用的 IANA 时区，可改为 Asia/Tokyo、Europe/Berlin 等
