@@ -8,7 +8,7 @@
 - **主题以 npm 包 `shirones` 的形式使用**（package 模式）：仓库里只有配置、内容与静态资源，
   主题源码在 `node_modules/shirones`。主题更新 = `pnpm update shirones`，不再是 `git pull upstream`。
   （仓库历史中仍保留早期 Mizuki 主题的提交，仅供追溯，不再同步。）
-- 站点与提交描述统一使用中文。
+- 站点内容使用中文；提交信息（标题与正文）使用英文。
 - 主站（canonical）：<https://gcross.pages.dev>；GitHub Pages 仅为镜像，安全响应头只在 Cloudflare 侧生效。
 - 推送到 `main` 会自动触发 3 个 workflow：`Lint` / `Deploy to Cloudflare Pages` / `Deploy to GitHub Pages`，三者全绿才算完成。
 
@@ -61,19 +61,19 @@
 
 ## 提交信息规范
 
-标题格式：`<type>(<scope>): <中文描述>`
+标题格式：`<type>(<scope>): <English description>`
 
 - **type**：`feat` `fix` `chore` `docs` `refactor` `perf` `style` `ci` `build` `test`
 - **scope** 可省略；常用值：`nav` `banner` `layout` `config` `site` `brand` `devices` `privacy` `security` `deps` `music-player` `markdown`
-- 描述用中文、动词开头，结尾不加句号，标题尽量简短（建议 50 字符以内）。
-- 正文说明「改了什么 / 为什么 / 如何验证」，每行约 72 字符换行。
+- 描述用英文、动词开头、祈使语气，结尾不加句号，标题尽量简短（建议 50 字符以内）。
+- 正文说明「what changed / why / how it was verified」，每行约 72 字符换行。
 
 示例：
 
 ```
-feat(brand): 顶栏图标与 favicon 换成 404 徽章
+feat(brand): switch the top nav icon and favicon to the 404 badge
 
-chore(deps): 从 Mizuki 迁移到 Shirone（shirones 包模式）
+chore(deps): migrate from Mizuki to Shirone (shirones package mode)
 ```
 
 一次提交只做一件事，不要混入无关的格式化或重构。
