@@ -1,0 +1,69 @@
+---
+// 覆盖主题的 system/ConfigCarrier，用于在持久布局壳里挂载访问统计（Microsoft Clarity）。
+//
+// 为什么不改 umamiConfig：主题没有通用 head 注入点，umami 槽位只服务 umami 运行时，
+// 借用会连 umami 的 SPA 采集一起带出来。ConfigCarrier 在 Layout 里只渲染一次，
+// 是体积最小、语义最干净的挂载点。
+import { resolveTextureOptions, siteConfig } from "@/config";
+
+const textureOptions = resolveTextureOptions();
+---
+
+<div
+	id="config-carrier"
+	data-hue={siteConfig.themeColor.hue}
+	data-wallpaper-mode={siteConfig.wallpaperMode.defaultMode}
+	{...(textureOptions.enable
+		? {
+				"data-texture-preset": textureOptions.defaultPreset,
+				"data-texture-opacity": textureOptions.defaultOpacity,
+			}
+		: {})}
+>
+</div>
+
+<!--
+	Microsoft Clarity 访问统计。
+	- 尊重 Do Not Track：浏览器开启 DNT 时完全不加载；
+	- 延迟加载：首次交互（滚动 / 移动 / 点击 / 按键 / 触摸）后才请求，否则 10 秒后加载；
+	- Swup 会替换 body，这里用 window 上的标记保证整站会话只注入一次。
+-->
+<script is:inline>
+	(function () {
+		if (window.__gcrossClarityBooted) return;
+		window.__gcrossClarityBooted = true;
+
+		var dnt =
+			window.doNotTrack === "1" ||
+			navigator.doNotTrack === "1" ||
+			navigator.msDoNotTrack === "1";
+		if (dnt) return;
+
+		var injected = false;
+		function loadClarity() {
+			if (injected) return;
+			injected = true;
+			(function (c, l, a, r, i, t, y) {
+				c[a] =
+					c[a] ||
+					function () {
+						(c[a].q = c[a].q || []).push(arguments);
+					};
+				t = l.createElement(r);
+				t.async = 1;
+				t.src = "https://www.clarity.ms/tag/" + i;
+				y = l.getElementsByTagName(r)[0];
+				y.parentNode.insertBefore(t, y);
+			})(window, document, "clarity", "script", "yqdo4s8yn8");
+		}
+
+		var events = ["scroll", "mousemove", "click", "keydown", "touchstart"];
+		for (var i = 0; i < events.length; i++) {
+			window.addEventListener(events[i], loadClarity, {
+				once: true,
+				passive: true,
+			});
+		}
+		window.setTimeout(loadClarity, 10000);
+	})();
+</script>
