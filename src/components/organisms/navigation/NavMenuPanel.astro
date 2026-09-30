@@ -66,11 +66,20 @@ const processedLinks: ProcessedNavBarLink[] = (
 							aria-expanded="false"
 						>
 							<div class="flex items-center transition text-black/75 dark:text-white/75 font-bold">
-								{link.icon && (
-									<Icon
-										name={link.icon}
-										class="text-[1.1rem] mr-2"
+								{link.image ? (
+									<img
+										src={link.image}
+										alt=""
+										class="w-[1.1rem] h-[1.1rem] object-contain mr-2"
+										loading="lazy"
 									/>
+								) : (
+									link.icon && (
+										<Icon
+											name={link.icon}
+											class="text-[1.1rem] mr-2"
+										/>
+									)
 								)}
 								{getLocalizedName(link.name)}
 							</div>
@@ -92,11 +101,20 @@ const processedLinks: ProcessedNavBarLink[] = (
 									target={child.external ? "_blank" : null}
 								>
 									<div class="flex items-center transition text-black/60 dark:text-white/60 font-medium">
-										{child.icon && (
-											<Icon
-												name={child.icon}
-												class="text-[1.1rem] mr-2"
+										{child.image ? (
+											<img
+												src={child.image}
+												alt=""
+												class="w-[1.1rem] h-[1.1rem] object-contain mr-2"
+												loading="lazy"
 											/>
+										) : (
+											child.icon && (
+												<Icon
+													name={child.icon}
+													class="text-[1.1rem] mr-2"
+												/>
+											)
 										)}
 										{getLocalizedName(child.name)}
 									</div>
@@ -119,11 +137,20 @@ const processedLinks: ProcessedNavBarLink[] = (
 						target={link.external ? "_blank" : null}
 					>
 						<div class="flex items-center transition text-black/75 dark:text-white/75 font-bold">
-							{link.icon && (
-								<Icon
-									name={link.icon}
-									class="text-[1.1rem] mr-2"
+							{link.image ? (
+								<img
+									src={link.image}
+									alt=""
+									class="w-[1.1rem] h-[1.1rem] object-contain mr-2"
+									loading="lazy"
 								/>
+							) : (
+								link.icon && (
+									<Icon
+										name={link.icon}
+										class="text-[1.1rem] mr-2"
+									/>
+								)
 							)}
 							{getLocalizedName(link.name)}
 						</div>
