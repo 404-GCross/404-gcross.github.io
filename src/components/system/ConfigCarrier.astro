@@ -23,6 +23,22 @@ const textureOptions = resolveTextureOptions();
 </div>
 
 <!--
+	站点级样式微调：主题没有 CSS 注入点，这里挂在只渲染一次的布局壳上。
+	「关于」下拉里最长的一条是仓库名（404-gcross.github.io），默认宽度会折行，
+	改成按内容撑宽、上限 24rem（手机端不超过 90vw）。
+-->
+<style is:global>
+	.top-app-bar__submenu {
+		width: max-content;
+		max-width: min(90vw, 24rem);
+	}
+
+	.top-app-bar__submenu-item {
+		white-space: nowrap;
+	}
+</style>
+
+<!--
 	Microsoft Clarity 访问统计。
 	- 尊重 Do Not Track：浏览器开启 DNT 时完全不加载；
 	- 延迟加载：首次交互（滚动 / 移动 / 点击 / 按键 / 触摸）后才请求，否则 10 秒后加载；
