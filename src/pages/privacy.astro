@@ -1,42 +1,77 @@
 ---
-import { getEntry, render } from "astro:content";
-import Comment from "@components/comment/index.astro";
-import { PageHeader } from "@components/features/page-header";
-import Markdown from "@components/misc/Markdown.astro";
+// 主题没有内置隐私页，这里作为站点自有页面补充（静态路由优先于主题的 catch-all）。
+import Card from "@components/atoms/display/Card.svelte";
+import Markdown from "@components/content/Markdown.astro";
 import MainGridLayout from "@layouts/MainGridLayout.astro";
 
-export const prerender = true;
-
-const privacyPost = await getEntry("spec", "privacy");
-
-if (!privacyPost) {
-	throw new Error("privacy page content not found");
-}
-
-const { Content } = await render(privacyPost);
-const title = "隐私说明";
-const description =
-	"本站会如何处理你的信息：访问统计、Cookie、本地存储、第三方服务外链，以及如何退出统计。";
+const pageTitle = "隐私说明";
+const pageDescription = "本站如何处理与你有关的信息";
 ---
 
-<MainGridLayout title={title} description={description}>
-	<script>
-		import("../scripts/right-sidebar-layout.js");
-	</script>
-	<div
-		class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32"
-	>
-		<div class="card-base z-10 px-9 py-6 relative w-full">
-			<PageHeader title={title} />
-
-			<!-- 从MD文件读取的内容 -->
+<MainGridLayout title={pageTitle} description={pageDescription}>
+	<div class="flex w-full rounded-[var(--shape-corner-l)] overflow-hidden relative min-h-32">
+		<Card color="var(--card-bg)" radius="l" class="z-10 p-6 lg:p-8 relative w-full">
 			<Markdown class="mt-2">
-				<Content />
-			</Markdown>
-		</div>
-	</div>
+				<h1>隐私说明</h1>
+				<p>本页说明本站（<strong>404</strong>）会如何处理与你有关的信息。如果你在意自己的数据，这里把话说清楚。</p>
 
-	<div class="mt-4">
-		<Comment path="/privacy/" />
+				<h2>一句话总结</h2>
+				<p>本站是纯静态的个人博客：<strong>不需要注册、不收集你的姓名/邮箱/手机号、不投放广告</strong>。唯一的第三方统计是 Microsoft Clarity，它只在你与页面产生交互之后才会加载，而且<strong>只要你的浏览器开启了「请勿跟踪」（DNT），它就完全不会加载</strong>。</p>
+
+				<h2>本站会用到哪些信息</h2>
+
+				<h3>1. 访问统计：Microsoft Clarity</h3>
+				<ul>
+					<li><strong>用途</strong>：了解哪些文章有人看、页面有没有问题。</li>
+					<li><strong>收集内容</strong>：页面浏览、点击、滚动、鼠标移动轨迹，以及<strong>会话回放（相当于录屏）</strong>；同时包含浏览器、设备、大致地区等粗略信息。</li>
+					<li><strong>Cookie</strong>：Clarity 会写入 <code>_clck</code>、<code>_clsk</code> 两个 cookie。</li>
+					<li><strong>数据去向</strong>：由微软（Microsoft）处理与存储，本站只能看到汇总数据。</li>
+					<li><strong>加载时机</strong>：你第一次滚动、点击、移动鼠标或按键之后才加载；如果你一直不操作，则在 10 秒后加载。</li>
+				</ul>
+
+				<h3>2. 服务器日志：Cloudflare / GitHub</h3>
+				<ul>
+					<li>本站主站托管在 Cloudflare Pages，镜像托管在 GitHub Pages。</li>
+					<li>服务方会在服务器日志中记录访问 IP、User-Agent 等，用于安全防护与流量统计，具体保留策略以 Cloudflare、GitHub 各自的隐私政策为准。</li>
+				</ul>
+
+				<h3>3. 本地存储：只存在你的浏览器里</h3>
+				<ul>
+					<li>主题偏好（深浅色、配色风格、背景纹理、文章列表布局、音乐播放器状态等）存储在浏览器的 localStorage 中，<strong>不会上传到任何服务器</strong>。清理浏览器数据即可删除。</li>
+				</ul>
+
+				<h3>4. 音乐播放器：第三方接口</h3>
+				<ul>
+					<li>播放器<strong>不会自动播放</strong>。只有你主动点击播放时，才会向第三方 Meting 接口请求数据，并因此把你的 IP、User-Agent 发送给该服务。</li>
+					<li>当前接口为第三方公共实例 <code>https://meting.mysqil.com/</code>，<strong>并非本站自建</strong>，音频文件由网易云音乐的服务器提供。</li>
+					<li>如果你不使用播放器，就不会有任何请求发出。</li>
+				</ul>
+
+				<h2>本站不会做的事</h2>
+				<ul>
+					<li>不要求注册或登录，不收集姓名、邮箱、手机号、身份证等个人信息</li>
+					<li>不投放广告，不做用户画像，不向第三方出售或共享你的数据</li>
+					<li>不开启评论区（当前评论功能处于关闭状态）</li>
+				</ul>
+
+				<h2>如何拒绝统计、保护自己</h2>
+				<ol>
+					<li><strong>开启浏览器的「请勿跟踪」（Do Not Track）</strong>：本站会读取这个信号，检测到你开启后<strong>不会加载任何统计脚本</strong>。</li>
+					<li><strong>使用拦截类扩展</strong>（例如 uBlock Origin）：拦截 <code>clarity.ms</code> 域名后统计脚本无法工作。</li>
+					<li><strong>使用带跟踪保护的浏览器</strong>：Safari、Firefox 等默认就会拦截大部分统计脚本。</li>
+					<li><strong>清理 cookie 与站点数据</strong>：可一并删除 Clarity 写入的 <code>_clck</code>、<code>_clsk</code>。</li>
+				</ol>
+
+				<h2>外部链接</h2>
+				<p>文章、侧栏和页脚中会链接到第三方站点（GitHub、Bilibili、KunGal 论坛、Astro 等）。点击离开本站后，你的信息将适用对方站点的隐私政策，本站无法控制。站内外链均以新标签页打开，并带有 <code>rel="noopener noreferrer"</code>，对方站点无法借此操作本页。</p>
+
+				<h2>免责声明</h2>
+				<p>这是一个个人博客，内容仅代表个人观点，不构成任何专业建议。</p>
+				<p>如果你发现本站存在隐私或安全问题，欢迎通过 <a href="https://github.com/404-GCross">GitHub</a> 或 <a href="https://space.bilibili.com/284794628">Bilibili</a> 联系我。</p>
+
+				<hr />
+				<p><em>最后更新：2026 年 9 月 30 日</em></p>
+			</Markdown>
+		</Card>
 	</div>
 </MainGridLayout>

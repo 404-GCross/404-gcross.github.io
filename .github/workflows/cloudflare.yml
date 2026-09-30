@@ -31,12 +31,11 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build site
         run: pnpm run build
         env:
-          ENABLE_CONTENT_SYNC: false
           NODE_OPTIONS: --max-old-space-size=4096
 
       - name: Deploy to Cloudflare Pages
