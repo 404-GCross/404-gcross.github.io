@@ -34,7 +34,36 @@ export interface Project {
 // 	featured: true,
 // 	tags: ["Web"],
 // },
-export const projectsData: Project[] = [];
+export const projectsData: Project[] = [
+	{
+		id: "sena-repo",
+		title: "Sena-Repo",
+		description:
+			"自托管、跨平台的视觉小说库管理器，支持一键安装游戏并向 Steam 注入补丁。",
+		image: "/assets/projects/sena-repo.webp",
+		category: "desktop",
+		techStack: ["Flutter", "Dart", "Python", "Docker"],
+		status: "in-progress",
+		visitUrl: "https://sena-repo.github.io",
+		sourceCode: "https://github.com/404-GCross/Sena-Repo",
+		startDate: "2026-06-05",
+		featured: true,
+		tags: ["视觉小说", "AGPL-3.0"],
+	},
+	{
+		id: "droidspaces-gki",
+		title: "Droidspaces GKI 本地编译",
+		description:
+			"本地一键编译适用于 Droidspaces 的 GKI 内核，支持镜像加速，无需直连 GitHub。",
+		image: "/assets/projects/droidspaces-gki.webp",
+		category: "other",
+		techStack: ["Shell", "C", "Makefile", "KernelSU"],
+		status: "in-progress",
+		sourceCode: "https://github.com/404-GCross/Droidspaces_GKI_Buildin_Local",
+		startDate: "2026-05-23",
+		tags: ["内核编译", "GPL-2.0"],
+	},
+];
 
 // Get project statistics
 export const getProjectStats = () => {
