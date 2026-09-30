@@ -1,3 +1,10 @@
+# Cloudflare Pages 响应头配置（GitHub Pages 不支持 _headers，仅对 gcross.pages.dev 生效）
+# /* 里的安全头会被所有更具体的规则继承（Cloudflare 的规则是叠加的）
+#
+# CSP 先用 Report-Only 观察：不拦截任何请求，只在浏览器控制台报违规。
+# 确认搜索(Pagefind wasm)、音乐播放器都正常后，把下面的头部名字从
+# Content-Security-Policy-Report-Only 改成 Content-Security-Policy 即正式生效。
+
 /atom.xml
   Access-Control-Allow-Origin: *
   Access-Control-Allow-Methods: GET
@@ -10,6 +17,12 @@
 
 /*
   Cache-Control: public, max-age=3600, must-revalidate
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://www.clarity.ms https://scripts.clarity.ms https://code.iconify.design; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https: http:; font-src 'self' data:; connect-src 'self' https:; frame-src 'self' https:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'
 
 /_astro/*
   ! Cache-Control

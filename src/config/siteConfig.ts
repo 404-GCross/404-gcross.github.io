@@ -205,6 +205,10 @@ export const siteConfig: SiteConfig = {
 	thirdPartyAnalytics: {
 		enable: true, // 是否启用第三方统计（Microsoft Clarity），默认关闭，启用可能影响 Lighthouse 评分
 		clarityId: "yqdo4s8yn8", // Clarity 项目 ID
+		// Google Tag Manager 容器 ID，留空 = 完全不加载 GTM。
+		// 安全提示：主题源码里写死的是作者的容器 GTM-KRX3XGVH，
+		// 填上它等于把你的访客数据交给第三方，除非你自己有容器，否则保持留空。
+		gtmId: "",
 	},
 	// 卡片样式配置
 	card: {
