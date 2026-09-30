@@ -66,7 +66,14 @@ if (footerConfig.enable) {
 			<a
 				class="transition link text-[var(--primary)] font-medium"
 				target="_blank"
+				rel="noopener noreferrer"
 				href={url("sitemap-index.xml")}>Sitemap</a
+			> /
+			<a
+				class="transition link text-[var(--primary)] font-medium"
+				href={url("privacy/")}
+				onclick={`event.preventDefault(); navigateToPage('${url("privacy/")}')`}
+				>隐私</a
 			>
 		</div>
 
@@ -75,15 +82,18 @@ if (footerConfig.enable) {
 			<a
 				class="transition link text-[var(--primary)] font-medium"
 				target="_blank"
+				rel="noopener noreferrer"
 				href="https://astro.build">Astro</a
 			> &
 			<a
 				class="transition link text-[var(--primary)] font-medium"
 				target="_blank"
+				rel="noopener noreferrer"
 				href="https://github.com/LyraVoid/Mizuki">Mizuki</a
 			>&nbsp; Version <a
 				class="transition link text-[var(--primary)] font-medium"
 				target="_blank"
+				rel="noopener noreferrer"
 				href="https://github.com/LyraVoid/Mizuki">9.0</a
 			>
 		</div>

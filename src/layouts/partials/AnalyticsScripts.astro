@@ -18,9 +18,7 @@ interface Props {
 	};
 }
 
-const {
-	thirdPartyAnalytics = { enable: false, clarityId: "" },
-} = Astro.props;
+const { thirdPartyAnalytics = { enable: false, clarityId: "" } } = Astro.props;
 
 const clarityEnable =
 	thirdPartyAnalytics.enable && thirdPartyAnalytics.clarityId;
@@ -41,6 +39,20 @@ const gtmId = thirdPartyAnalytics.gtmId || "";
 	(function () {
 		// 标记脚本是否已加载
 		window.analyticsLoaded = window.analyticsLoaded || false;
+
+		// 尊重 Do Not Track：浏览器开启后不加载任何统计脚本
+		const dnt =
+			navigator.doNotTrack === "1" ||
+			window.doNotTrack === "1" ||
+			navigator.msDoNotTrack === "1";
+		if (dnt) {
+			return;
+		}
+
+		// 两个统计都没配置时，连事件监听都不必挂
+		if (!gtmId && !(clarityEnable && clarityId)) {
+			return;
+		}
 
 		function loadAnalytics() {
 			if (window.analyticsLoaded) {
