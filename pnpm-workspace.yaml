@@ -2,6 +2,12 @@ allowBuilds:
   esbuild: true
   sharp: true
   ttf2woff2: true
+# 修复 GHSA-5c6j-r48x-rmvq（serialize-javascript RCE）：
+# 唯一的引入路径是 @swup/astro → @swup/plugin → microbundle → rollup-plugin-terser，
+# 后者声明的是 ^4.0.0，而修复版本只有 >=7.0.3，因此在这里统一覆盖。
+# 该链路只在构建期使用，不会进入站点产物。
+overrides:
+  serialize-javascript: ^7.0.3
 minimumReleaseAgeExclude:
   - oddmisc
   - '@astrojs/*'
