@@ -97,8 +97,8 @@ const favicons: Favicon[] =
 <!-- 字体通过构建脚本压缩到 /assets/font/ 目录，此处不再预加载以避免 404 -->
 <!-- 字体在构建时通过 scripts/compress-fonts.js 处理并复制到 dist/ -->
 
-<!-- 预连接 Iconify API 以减少图标加载延迟 -->
-<link rel="preconnect" href="https://api.iconify.design" crossorigin />
+<!-- 图标全部在构建期内联为 SVG，页面不存在运行时 <iconify-icon>，
+     因此无需预连接第三方 Iconify API（预连接会把访客 IP 暴露给 api.iconify.design） -->
 
 <!-- Set the theme before the page is rendered to avoid a flash -->
 <script

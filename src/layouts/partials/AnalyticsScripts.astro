@@ -11,20 +11,22 @@
  */
 
 interface Props {
-	gtmId?: string;
 	thirdPartyAnalytics?: {
 		enable: boolean;
 		clarityId?: string;
+		gtmId?: string;
 	};
 }
 
 const {
-	gtmId = "GTM-KRX3XGVH",
 	thirdPartyAnalytics = { enable: false, clarityId: "" },
 } = Astro.props;
 
 const clarityEnable =
 	thirdPartyAnalytics.enable && thirdPartyAnalytics.clarityId;
+
+// GTM 默认关闭：只有显式配置了 gtmId 才会加载
+const gtmId = thirdPartyAnalytics.gtmId || "";
 ---
 
 <!-- 第三方分析脚本 - 仅在用户交互后延迟加载 -->
@@ -46,19 +48,21 @@ const clarityEnable =
 			}
 			window.analyticsLoaded = true;
 
-			// Google Tag Manager
-			(function (w, d, s, l, i) {
-				w[l] = w[l] || [];
-				w[l].push({
-					"gtm.start": new Date().getTime(),
-					event: "gtm.js",
-				});
-				const f = d.getElementsByTagName(s)[0],
-					j = d.createElement(s);
-				j.async = true;
-				j.src = "https://www.googletagmanager.com/gtm.js?id=" + i;
-				f.parentNode.insertBefore(j, f);
-			})(window, document, "script", "dataLayer", gtmId);
+			// Google Tag Manager（仅在显式配置 gtmId 时加载，默认不加载）
+			if (gtmId) {
+				(function (w, d, s, l, i) {
+					w[l] = w[l] || [];
+					w[l].push({
+						"gtm.start": new Date().getTime(),
+						event: "gtm.js",
+					});
+					const f = d.getElementsByTagName(s)[0],
+						j = d.createElement(s);
+					j.async = true;
+					j.src = "https://www.googletagmanager.com/gtm.js?id=" + i;
+					f.parentNode.insertBefore(j, f);
+				})(window, document, "script", "dataLayer", gtmId);
+			}
 
 			// Clarity (仅在启用时加载)
 			if (clarityEnable && clarityId) {
