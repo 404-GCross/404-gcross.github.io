@@ -158,7 +158,7 @@ export const siteConfig: SiteConfig = {
 			title: "欢迎来到404",
 			switchable: true,
 
-			subtitle: ["Just for fun", "记录一些喜欢的东西", "愿你今天也有好心情"],
+			subtitle: ["Just for fun", "愿你今天也有好心情"],
 			typewriter: {
 				enable: true, // 启用副标题打字机效果
 
