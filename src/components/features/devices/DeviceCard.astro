@@ -18,22 +18,26 @@ const { device, index, viewDetailsText } = Astro.props;
 	style={`animation-delay: ${index * 100}ms`}
 >
 	<!-- 设备图片区域 -->
-	<div class="relative p-6 pb-0">
-		<div
-			class="flex justify-center items-center h-48 bg-linear-to-br from-(--card-bg) to-(--btn-regular-bg) rounded-lg overflow-hidden relative"
-		>
-			<div
-				class="absolute inset-0 bg-(--primary)/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-			>
+	{
+		device.image && (
+			<div class="relative p-6 pb-0">
+				<div
+					class="flex justify-center items-center h-48 bg-linear-to-br from-(--card-bg) to-(--btn-regular-bg) rounded-lg overflow-hidden relative"
+				>
+					<div
+						class="absolute inset-0 bg-(--primary)/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+					>
+					</div>
+					<img
+						src={device.image}
+						alt={device.name}
+						class="w-auto h-full max-h-full object-contain group-hover:scale-110 transition-all duration-500 drop-shadow-md relative z-10"
+						loading="lazy"
+					/>
+				</div>
 			</div>
-			<img
-				src={device.image}
-				alt={device.name}
-				class="w-auto h-full max-h-full object-contain group-hover:scale-110 transition-all duration-500 drop-shadow-md relative z-10"
-				loading="lazy"
-			/>
-		</div>
-	</div>
+		)
+	}
 
 	<!-- 设备信息区域 -->
 	<div class="p-6 pt-4 relative z-10">

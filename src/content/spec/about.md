@@ -1,49 +1,32 @@
+Hi，我是 **川宇不是GCross**，欢迎来到 **御影小站**。
 
-This website is built with the **Astro** framework using the [Mizuki](https://github.com/LyraVoid/Mizuki) theme.
+这里是我的个人角落，会随手记录一些日常、折腾和各种喜欢的东西。
+
+## 关于我
+
+- 喜欢折腾数码设备和各种奇奇怪怪的东西
+- 会一点点前端，算是半个爱好者
+- 座右铭：**Just for fun**
+
+## 我的设备
+
+- 手机：小米 17 Pro、红米 K90 Pro Max
+- 平板：小米平板 8 Pro
+- 掌机：ROG ALLY
+- 笔记本：ROG 幻14 Air 2025
+
+## 找到我
+
+- GitHub：[404-GCross](https://github.com/404-GCross)
+- Bilibili：[川宇不是GCross](https://space.bilibili.com/284794628)
+- Kungal 论坛：[个人主页](https://www.kungal.com/user/1922)
+
+## 关于本站
+
+本站使用 [Astro](https://astro.build/) 构建，主题为 [Mizuki](https://github.com/LyraVoid/Mizuki)。
 
 ::github{repo="LyraVoid/Mizuki"}
 
-## 🌟 Theme Features
-
-### 🎨 Design & User Experience
-- **Modern & Elegant Design** - Clean, minimalist interface with beautiful typography
-- **Fully Responsive** - Optimized for all devices from mobile to desktop
-- **Dark/Light Mode** - Automatic theme switching with smooth transitions
-- **Beautiful Typography** - Enhanced readability with JetBrains Mono font
-- **Smooth Animations** - Fluid page transitions and interactive elements
-
-### 🔍 Content & Search
-- **Advanced Search** - Powered by [Pagefind](https://pagefind.app/) for fast, accurate results
-- **Enhanced Markdown** - Extended syntax with code highlighting and math support
-- **Interactive Table of Contents** - Auto-scroll navigation for long articles
-- **RSS Feed Generation** - Stay updated with automatic feed generation
-- **Reading Time Estimation** - Know how long articles take to read
-- **Post Categorization** - Organize content with tags and categories
-
-
-
-### 📱 Special Pages
-- **Anime Tracking Page** - Track your anime watching progress with ratings
-- **Friends Links Page** - Showcase friend websites with beautiful cards
-- **Diary/Moments Page** - Share life moments like social media posts
-- **Archive Page** - Organized timeline view of all posts
-- **About Page** - Customizable personal introduction (this page!)
-
-### 🛠 Technical Features
-- **Enhanced Code Blocks** - Powered by [Expressive Code](https://expressive-code.com/)
-- **Math Support** - LaTeX rendering with KaTeX for mathematical expressions
-- **Image Optimization** - PhotoSwipe gallery with lazy loading
-- **SEO Optimized** - Built-in sitemap and meta tags for better search visibility
-- **Performance Optimized** - Fast loading with caching and optimization
-- **Comment System Ready** - Integration support for Twikoo comments
-
-### 🎯 Advanced Markdown Features
-- **Callouts & Admonitions** - Beautiful info boxes with `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`
-- **Mathematical Equations** - Write LaTeX math with `$inline$` and `$$block$$` syntax
-- **GitHub Cards** - Embed repository cards with `::github{repo="user/repo"}`
-- **Syntax Highlighting** - Advanced code highlighting with line numbers
-- **Copy Code Buttons** - Easy code copying functionality
-
 ---
 
-*Built with ❤️ using Astro and inspired by modern web design principles.*
+*Just for fun ✨*
