@@ -217,6 +217,7 @@ export interface NavBarLink {
 	url: string;
 	external?: boolean;
 	icon?: string; // 菜单项图标
+	image?: string; // 用图片当图标（优先于 icon），适合没有现成矢量图标的站点，路径相对 /public
 	children?: (NavBarLink | LinkPreset)[]; // 支持子菜单，可以是NavBarLink或LinkPreset
 }
 
@@ -232,6 +233,7 @@ export interface ProfileConfig {
 		name: string;
 		url: string;
 		icon: string;
+		image?: string; // 用图片当图标（优先于 icon），路径相对 /public
 	}[];
 	typewriter?: {
 		enable: boolean; // 是否启用打字机效果
