@@ -158,6 +158,11 @@ export const navBarConfig: NavBarConfig = {
 					url: "/projects/",
 					icon: "material-symbols:work",
 				},
+				{
+					name: "隐私说明",
+					url: "/privacy/",
+					icon: "material-symbols:privacy-tip",
+				},
 			],
 		},
 
