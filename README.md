@@ -23,7 +23,6 @@ pnpm preview   # 预览构建产物
 | 路径 | 用途 |
 | --- | --- |
 | `shirones/content/posts/` | 文章 |
-| `shirones/content/moments/` | 日记 |
 | `shirones/content/spec/about.md` | 关于页 |
 | `shirones/config/` | 站点配置（标题、导航、侧栏、主题色、音乐……） |
 | `shirones/config/data/` | 设备、项目、友链等数据 |

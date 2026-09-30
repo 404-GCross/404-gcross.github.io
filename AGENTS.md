@@ -20,10 +20,10 @@
 | `shirones/config/*.ts` | 站点配置（站点身份、导航、侧栏、设备、项目、音乐、评论……） |
 | `shirones/config/data/*.ts` | 纯内容数据（设备、项目、友链、音乐） |
 | `shirones/content/posts/` | 文章 |
-| `shirones/content/moments/` | 日记（主题里叫 moments） |
+| `shirones/content/moments/` | 日记目录（本站已关闭日记，仅留占位） |
 | `shirones/content/spec/about.md` | 「关于」页内容 |
 | `src/pages/privacy.astro` | 站点自有的「隐私说明」页（主题没有此页） |
-| `src/components/` | 覆盖主题组件的目录（目前只有 `system/ConfigCarrier.astro`，挂载 Clarity） |
+| `src/components/` | 覆盖主题组件的目录：`system/ConfigCarrier.astro`（挂载 Clarity）、`molecules/SiteStats.astro`（关闭日记后隐藏「动态」统计行） |
 | `public/` | 静态资源：banner、设备图、项目封面、favicon、`_headers` |
 | `.github/workflows/` | 三个 CI workflow |
 
@@ -32,7 +32,7 @@
 - **图片一律用 public 绝对路径**（如 `/images/device/xxx.webp`）。package 模式下主题只会在自己的
   包里解析相对路径，写在 `src/assets/...` 的相对路径会指到主题自带图片。
 - **关闭页面**要两处同时改：对应配置里的 `enable: false`（导航自动裁剪），以及
-  `astro.config.mjs` 的 `excludeRoutes`（不产出路由）。当前关闭：番剧、相册、技能、时间线、
+  `astro.config.mjs` 的 `excludeRoutes`（不产出路由）。当前关闭：日记、番剧、相册、技能、时间线、
   游戏、站点罗盘、系列。
 - **访问统计**是 Microsoft Clarity（`yqdo4s8yn8`），通过覆盖 `src/components/system/ConfigCarrier.astro`
   注入：尊重 DNT，首次交互或 10 秒后才加载。主题自带的 umami 配置保持关闭。
@@ -76,5 +76,5 @@ git config user.email "176783842+404-GCross@users.noreply.github.com"
 | 类型检查 | `corepack pnpm run check`（`astro check`） |
 | 本地预览构建产物 | `corepack pnpm run preview` |
 
-> 新增/删除内容目录后若出现 `glob-loader` 空集合警告，属于正常提示；`shirones/content/series`
-> 与 `snippets` 只是占位，本站未使用系列功能。
+> 新增/删除内容目录后若出现 `glob-loader` 空集合警告，属于正常提示；`shirones/content/moments`、
+> `series` 与 `snippets` 都只是占位，本站未使用日记与系列功能。

@@ -15,7 +15,7 @@ draft: false
 
 - 使用 [Astro](https://astro.build/) 构建，主题为 [Shirone](https://github.com/LyraVoid/Shirone)
 - 同时部署在 Cloudflare Pages 和 GitHub Pages
-- 支持文章搜索、归档、友链、日记、设备和音乐播放器
+- 支持文章搜索、归档、友链、设备和音乐播放器
 
 ## 之后会写点什么
 

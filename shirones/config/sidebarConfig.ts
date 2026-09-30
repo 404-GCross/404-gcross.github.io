@@ -26,7 +26,6 @@ const contentPages = [
 	"home",
 	"archive",
 	"friends",
-	"moments",
 	"projects",
 	"devices",
 	"about",

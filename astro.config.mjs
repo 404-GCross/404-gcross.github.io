@@ -9,6 +9,7 @@ export default defineConfig({
 		shirones({
 			// 本站未维护的功能页直接不产出路由（配置里对应 enable 也已关闭）。
 			excludeRoutes: [
+				"/moments",
 				"/anime",
 				"/albums",
 				"/albums/[id]",
