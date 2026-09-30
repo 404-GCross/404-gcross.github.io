@@ -38,10 +38,10 @@
   游戏、站点罗盘、系列。
 - **访问统计**是 Microsoft Clarity（`yqdo4s8yn8`），通过覆盖 `src/components/system/ConfigCarrier.astro`
   注入：尊重 DNT，首次交互或 10 秒后才加载。主题自带的 umami 配置保持关闭。
-- **站点级样式微调**也挂在 `ConfigCarrier.astro`（它只渲染一次）：目前两条 —— 让「关于」下拉按内容撑宽、
-  避免长条目折行；把 `--banner-stage-height` 拉到 `100vh`，让页面背景回到全屏壁纸。
-  主题只有 `banner`（桌面首页 65vh）/ `none` 两种背景，没有 Mizuki 的 `fullscreen`/`overlay`，
-  所以用 `:root:root` 提高优先级压过主题媒体查询里的 `:root`。
+- **站点级样式微调**也挂在 `ConfigCarrier.astro`（它只渲染一次）：目前只有一条，
+  让「关于」下拉按内容撑宽，避免长条目折行。页面背景用主题默认的 `banner` 模式
+  （桌面首页 65vh），不改成整屏 —— 主题只有 `banner` / `none` 两种背景，
+  没有 Mizuki 的 `fullscreen`/`overlay`，别再往 `--banner-stage-height` 上打主意。
 - **侧栏「运行天数」**不用主题的 `stats.days`（它以最早一篇文章的发布日为起点，且构建时写死），
   而是读 `shirones/config/siteConfig.ts` 里本地扩展的 `siteStartDate`（主题类型没有这个字段，
   消费侧断言取用），按站点时区 `timeZone` 的自然日算「第 N 天」；覆盖版

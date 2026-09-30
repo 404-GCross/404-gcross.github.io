@@ -24,10 +24,9 @@ const textureOptions = resolveTextureOptions();
 
 <!--
 	站点级样式微调：主题没有 CSS 注入点，这里挂在只渲染一次的布局壳上。
-	1) 「关于」下拉按内容撑宽、上限 24rem（手机端不超过 90vw），长条目不再折行。
-	2) 页面背景铺满整屏：Shirone 只有 banner（桌面首页 65vh）和纯色两种背景，
-	   没有 Mizuki 的 fullscreen / overlay。把横幅舞台拉到整屏，回到全屏壁纸的样子。
-	   用 :root:root 提高优先级，压过主题在媒体查询里的 :root 值。
+	目前只有一条：「关于」下拉按内容撑宽、上限 24rem（手机端不超过 90vw），
+	长条目不再折行。
+	页面背景保持主题默认的横幅模式（桌面首页 65vh），不再拉高到整屏。
 -->
 <style is:global>
 	.top-app-bar__submenu {
@@ -37,10 +36,6 @@ const textureOptions = resolveTextureOptions();
 
 	.top-app-bar__submenu-item {
 		white-space: nowrap;
-	}
-
-	:root:root {
-		--banner-stage-height: 100vh;
 	}
 </style>
 
