@@ -42,6 +42,10 @@
   避免长条目折行；把 `--banner-stage-height` 拉到 `100vh`，让页面背景回到全屏壁纸。
   主题只有 `banner`（桌面首页 65vh）/ `none` 两种背景，没有 Mizuki 的 `fullscreen`/`overlay`，
   所以用 `:root:root` 提高优先级压过主题媒体查询里的 `:root`。
+- **侧栏「运行天数」**不用主题的 `stats.days`（它以最早一篇文章的发布日为起点，且构建时写死），
+  而是读 `shirones/config/siteConfig.ts` 里本地扩展的 `siteStartDate`（主题类型没有这个字段，
+  消费侧断言取用），按站点时区 `timeZone` 的自然日算「第 N 天」；覆盖版
+  `src/components/molecules/SiteStats.astro` 在页面加载时再算一次，不重新部署也会每天 +1。
 - **缓存策略**写在 `public/_headers`：非哈希资源（HTML 等）是 `max-age=0, must-revalidate`，
   部署后立刻生效；带哈希的 `/_astro/*`、`/assets/*`、`/images/*`、`*.woff2` 用 `! Cache-Control`
   单独改成 `immutable`。GitHub Pages 不支持 `_headers`，这些头只在 Cloudflare 侧生效。

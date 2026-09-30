@@ -13,7 +13,8 @@ import I18nKey from "@i18n/i18nKey";
 import { i18n } from "@i18n/translation";
 import { formatDateToYYYYMMDD } from "@utils/date-utils";
 import { getSiteStats } from "@utils/site-stats";
-import { momentsConfig, seriesConfig } from "@/config";
+import { momentsConfig, seriesConfig, siteConfig } from "@/config";
+import type { SiteConfig } from "@/types/config";
 import type { StatsWidget } from "@/types/sidebarConfig";
 // 相对路径 "./WidgetLayout.astro" 在 package 模式下指不到主题包里，
 // 用别名显式指向主题的同名组件。
@@ -32,6 +33,32 @@ const stats = await getSiteStats();
 // 千位分隔固定 en-US：构建产物数值稳定，不随构建机 locale 漂移
 const fmt = (n: number) => n.toLocaleString("en-US");
 
+// 运行天数不用主题的 stats.days：它以「最早一篇文章的发布日」为起点，
+// 且在构建时用 Date.now() 算一次写死，文章日期一变或长期不部署就会失准。
+// 这里改用配置的站点开始日，按站点时区的自然日数「第 N 天」（开始日即第 1 天）；
+// 页面加载后底部脚本会按同一口径再算一次，不重新部署也能每天 +1。
+//
+// siteStartDate 是我们在 shirones/config/siteConfig.ts 里本地扩展的字段
+// （构建时 Vite 会解析到那份覆盖文件），主题类型里没有，故此处断言取用。
+const DAY_MS = 86_400_000;
+const siteStartDate = (siteConfig as SiteConfig & { siteStartDate: string })
+	.siteStartDate;
+// 日序号：先取站点时区下的年月日，再按 UTC 零点折算成天数，
+// 这样构建机/访客的本地时区与夏令时都不会影响结果。
+const dayIndex = (date: Date) => {
+	const ymd = new Intl.DateTimeFormat("en-CA", {
+		timeZone: siteConfig.timeZone,
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	}).format(date);
+	return Math.floor(Date.parse(`${ymd}T00:00:00Z`) / DAY_MS);
+};
+const runningDays = Math.max(
+	1,
+	dayIndex(new Date()) - dayIndex(new Date(siteStartDate)) + 1,
+);
+
 // 最近更新：SSR 渲染绝对日期（构建产物稳定、无 JS 也可读），
 // 页面加载后由底部脚本升级为相对时间（今天/昨天/N 天前）
 const lastActivityText = stats.lastActivity
@@ -41,7 +68,17 @@ const todayText = i18n(I18nKey.statsToday);
 const yesterdayText = i18n(I18nKey.statsYesterday);
 const daysAgoText = i18n(I18nKey.statsDaysAgo);
 
-const rows = [
+interface StatRow {
+	icon: string;
+	label: string;
+	value: string;
+	/** 值为相对时间（今天 / 昨天 / N 天前），由页面脚本改写 */
+	relative?: boolean;
+	/** 值为运行天数，由页面脚本按站点开始日重算 */
+	days?: boolean;
+}
+
+const rows: StatRow[] = [
 	{
 		icon: "material-symbols:article-outline-rounded",
 		label: i18n(I18nKey.statsPosts),
@@ -85,7 +122,8 @@ const rows = [
 	{
 		icon: "material-symbols:calendar-month-outline-rounded",
 		label: i18n(I18nKey.statsDays),
-		value: fmt(stats.days),
+		value: fmt(runningDays),
+		days: true,
 	},
 	{
 		icon: "material-symbols:update-rounded",
@@ -106,6 +144,7 @@ const rows = [
 				<span
 					class="m3-site-stats__value"
 					data-last-update={row.relative ? "" : undefined}
+					data-running-days={row.days ? "" : undefined}
 					>{row.value}</span
 				>
 			</li>
@@ -149,7 +188,28 @@ const rows = [
 		white-space: nowrap
 </style>
 
-<script is:inline define:vars={{ lastActivityISO: stats.lastActivity, todayText, yesterdayText, daysAgoText }}>
+<script is:inline define:vars={{ startDate: siteStartDate, timeZone: siteConfig.timeZone, lastActivityISO: stats.lastActivity, todayText, yesterdayText, daysAgoText }}>
+	// 运行天数重算：构建时的值只在部署那天准确，这里按站点开始日现算一次
+	// （站点时区的自然日，「第 N 天」）；脚本禁用时保留 SSR 的值
+	(() => {
+		const el = document.querySelector("[data-running-days]");
+		if (!el) return;
+		const dayIndex = (date) => {
+			const ymd = new Intl.DateTimeFormat("en-CA", {
+				timeZone,
+				year: "numeric",
+				month: "2-digit",
+				day: "2-digit",
+			}).format(date);
+			return Math.floor(Date.parse(`${ymd}T00:00:00Z`) / 86_400_000);
+		};
+		const days = Math.max(
+			1,
+			dayIndex(new Date()) - dayIndex(new Date(startDate)) + 1,
+		);
+		el.textContent = days.toLocaleString("en-US");
+	})();
+
 	// 最近更新相对化：按本地时区取日界，差值恒为整天数；
 	// 无文章或脚本禁用时保留 SSR 的绝对日期
 	(() => {

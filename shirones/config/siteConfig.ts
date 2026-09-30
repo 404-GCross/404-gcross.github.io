@@ -8,12 +8,22 @@ import { withUserConfig } from "@/utils/config-overlay.ts";
 /**
  * 站点核心配置：标题 / 语言 / 主题色（HCT 动态配色）/ 横幅 / 目录 / 进度条 / favicon。
  * 类型见 src/types/config.ts。
+ *
+ * 主题没有「站点开始运行日期」这一项（它把侧栏「运行天数」绑在最早一篇文章的
+ * 发布日上，且在构建时写死），这里本地扩展一个 siteStartDate 作为计数起点。
  */
-export const siteConfig: SiteConfig = withUserConfig("site", {
+type SiteConfigWithStartDate = SiteConfig & {
+	/** 站点开始运行日期（YYYY-MM-DD），侧栏「运行天数」的起点 */
+	siteStartDate: string;
+};
+
+export const siteConfig: SiteConfigWithStartDate = withUserConfig("site", {
 	site: "https://gcross.pages.dev/",
 	base: "/",
 	title: "GCross's Blog",
 	subtitle: "欢迎来到404",
+	// 站点开始运行日期：与迁移前 Mizuki 配置里的 siteStartDate 保持一致
+	siteStartDate: "2026-09-30",
 	// 电脑端顶栏标题与导航内容区域："left" 左对齐，"center" 居中。
 	topAppBar: {
 		contentAlign: "center",
