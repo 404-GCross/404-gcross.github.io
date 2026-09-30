@@ -129,8 +129,9 @@ export const LinkPresets: Record<string, NavBarLink> = {
 		pageKey: "about",
 	},
 	GitHub: {
-		// 「关于」下拉里这条指向本站仓库、直接显示项目名，而不是平台名 GitHub。
-		name: "404-gcross.github.io",
+		// 「关于」下拉里这条指向本站仓库；标签写明用途（本站项目地址），
+		// 而不是平台名 GitHub，访客一眼能看出点进去是什么。
+		name: "本站项目地址",
 		url: "https://github.com/404-GCross/404-gcross.github.io",
 		icon: "fa6-brands:github",
 		external: true,

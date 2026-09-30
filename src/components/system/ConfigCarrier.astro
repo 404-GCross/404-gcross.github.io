@@ -24,8 +24,7 @@ const textureOptions = resolveTextureOptions();
 
 <!--
 	站点级样式微调：主题没有 CSS 注入点，这里挂在只渲染一次的布局壳上。
-	1) 「关于」下拉里最长的一条是仓库名（404-gcross.github.io），默认宽度会折行，
-	   改成按内容撑宽、上限 24rem（手机端不超过 90vw）。
+	1) 「关于」下拉按内容撑宽、上限 24rem（手机端不超过 90vw），长条目不再折行。
 	2) 页面背景铺满整屏：Shirone 只有 banner（桌面首页 65vh）和纯色两种背景，
 	   没有 Mizuki 的 fullscreen / overlay。把横幅舞台拉到整屏，回到全屏壁纸的样子。
 	   用 :root:root 提高优先级，压过主题在媒体查询里的 :root 值。
