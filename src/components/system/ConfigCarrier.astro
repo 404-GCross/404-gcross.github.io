@@ -24,9 +24,11 @@ const textureOptions = resolveTextureOptions();
 
 <!--
 	站点级样式微调：主题没有 CSS 注入点，这里挂在只渲染一次的布局壳上。
-	目前只有一条：「关于」下拉按内容撑宽、上限 24rem（手机端不超过 90vw），
-	长条目不再折行。
-	页面背景保持主题默认的横幅模式（桌面首页 65vh），不再拉高到整屏。
+	1) 「关于」下拉按内容撑宽、上限 24rem（手机端不超过 90vw），长条目不再折行。
+	2) 首页背景铺满整屏：主题只有 banner（桌面首页 65vh）/ none 两种背景，
+	   用 :root:root:has(...) 把横幅舞台拉到 100vh，且**只在首页生效**，
+	   其他页面保持主题默认的 65vh。body 的 data-current-page 由主题在 Swup
+	   导航时同步更新，所以站内切页后这条规则会自动失效/生效。
 -->
 <style is:global>
 	.top-app-bar__submenu {
@@ -36,6 +38,10 @@ const textureOptions = resolveTextureOptions();
 
 	.top-app-bar__submenu-item {
 		white-space: nowrap;
+	}
+
+	:root:root:has(body[data-current-page="home"]) {
+		--banner-stage-height: 100vh;
 	}
 </style>
 
