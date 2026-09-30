@@ -1,4 +1,4 @@
-# 御影小站
+# 404
 
 川宇不是GCross 的个人博客，基于 [Astro](https://astro.build) 与 [Mizuki](https://github.com/LyraVoid/Mizuki) 主题构建。
 
