@@ -1,0 +1,42 @@
+---
+import { getEntry, render } from "astro:content";
+import Comment from "@components/comment/index.astro";
+import { PageHeader } from "@components/features/page-header";
+import Markdown from "@components/misc/Markdown.astro";
+import MainGridLayout from "@layouts/MainGridLayout.astro";
+
+export const prerender = true;
+
+const privacyPost = await getEntry("spec", "privacy");
+
+if (!privacyPost) {
+	throw new Error("privacy page content not found");
+}
+
+const { Content } = await render(privacyPost);
+const title = "隐私说明";
+const description =
+	"本站会如何处理你的信息：访问统计、Cookie、本地存储、第三方服务外链，以及如何退出统计。";
+---
+
+<MainGridLayout title={title} description={description}>
+	<script>
+		import("../scripts/right-sidebar-layout.js");
+	</script>
+	<div
+		class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32"
+	>
+		<div class="card-base z-10 px-9 py-6 relative w-full">
+			<PageHeader title={title} />
+
+			<!-- 从MD文件读取的内容 -->
+			<Markdown class="mt-2">
+				<Content />
+			</Markdown>
+		</div>
+	</div>
+
+	<div class="mt-4">
+		<Comment path="/privacy/" />
+	</div>
+</MainGridLayout>
