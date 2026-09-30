@@ -150,7 +150,9 @@ body.wallpaper-transparent #toc-inner-wrapper:has(table-of-contents[data-loaded=
 
   /* 标题字体优化 */
   .banner-title {
-    font-size: 3.2rem !important;
+    /* 中文标题每个字都是全宽（1em），比拉丁字母宽得多，
+       「欢迎来到404」在 3.2rem 时会溢出一行，这里收小到一行放得下 */
+    font-size: 2.75rem !important;
     line-height: 1.1 !important;
     margin-bottom: 0.5rem !important;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8) !important;
