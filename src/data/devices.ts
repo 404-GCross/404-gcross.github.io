@@ -2,10 +2,10 @@
 
 export interface Device {
 	name: string;
-	image: string;
+	image?: string;
 	specs: string;
 	description: string;
-	link: string;
+	link?: string;
 }
 
 // 设备类别类型，支持品牌和自定义类别
@@ -14,23 +14,47 @@ export type DeviceCategory = Record<string, Device[]> & {
 };
 
 export const devicesData: DeviceCategory = {
-	OnePlus: [
+	手机: [
 		{
-			name: "OnePlus 13T",
-			image: "/images/device/oneplus13t.webp",
-			specs: "Gray / 16G + 1TB",
-			description: "Flagship performance, Hasselblad imaging, 80W SuperVOOC.",
-			link: "https://www.oneplus.com/cn/13t",
+			name: "小米 17 Pro",
+			image: "",
+			specs: "手机",
+			description: "日常主力机。",
+			link: "https://www.mi.com/",
+		},
+		{
+			name: "红米 K90 Pro Max",
+			image: "",
+			specs: "手机",
+			description: "大屏高性能，玩游戏用。",
+			link: "https://www.mi.com/",
 		},
 	],
-	Router: [
+	平板: [
 		{
-			name: "GL-MT3000",
-			image: "/images/device/mt3000.webp",
-			specs: "1000Mbps / 2.5G",
-			description:
-				"Portable WiFi 6 router suitable for business trips and home use.",
-			link: "https://www.gl-inet.cn/products/gl-mt3000/",
+			name: "小米平板 8 Pro",
+			image: "",
+			specs: "平板",
+			description: "看剧、记笔记、随手写点东西。",
+			link: "https://www.mi.com/",
+		},
+	],
+	掌机: [
+		{
+			name: "ROG ALLY",
+			image: "",
+			specs: "掌机",
+			description: "随时随地打游戏。",
+			link: "https://rog.asus.com.cn/",
+		},
+	],
+	笔记本: [
+		{
+			name: "ROG 幻14 Air 2025",
+			image: "",
+			specs: "笔记本",
+			description: "轻薄的独显本，便携与性能兼得。",
+			link: "https://rog.asus.com.cn/",
 		},
 	],
 };

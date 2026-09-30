@@ -132,104 +132,61 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.Home,
 		// 预设链接：归档
 		LinkPreset.Archive,
+		// 预设链接：友链
+		LinkPreset.Friends,
 
-		// 自定义一级下拉菜单示例：外部链接集合
+		// 自定义一级下拉菜单：关于
 		{
-			name: "Links",
-			url: "/links/",
-			icon: "material-symbols:link",
-			children: [
-				{
-					name: "GitHub",
-					url: "https://github.com/LyraVoid/Mizuki",
-					external: true, // 外部链接，新标签页打开
-					icon: "fa7-brands:github",
-				},
-				{
-					name: "Bilibili",
-					url: "https://space.bilibili.com/701864046",
-					external: true,
-					icon: "fa7-brands:bilibili",
-				},
-				{
-					name: "Gitee",
-					url: "https://gitee.com/matsuzakayuki/Mizuki",
-					external: true,
-					icon: "mdi:git",
-				},
-			],
-		},
-
-		// 自定义一级下拉菜单示例：个人内容页面
-		{
-			name: "My",
-			url: "/content/",
-			icon: "material-symbols:person",
-			children: [
-				{
-					name: "Anime",
-					url: "/anime/",
-					icon: "material-symbols:movie",
-				},
-				{
-					name: "Diary",
-					url: "/diary/",
-					icon: "material-symbols:book",
-				},
-				{
-					name: "Gallery",
-					url: "/albums/",
-					icon: "material-symbols:photo-library",
-				},
-				{
-					name: "Devices",
-					url: "/devices/",
-					icon: "material-symbols:devices",
-					external: false, // 内部链接，当前页导航
-				},
-			],
-		},
-
-		// 自定义一级下拉菜单示例：关于相关
-		{
-			name: "About",
-			url: "/content/",
+			name: "关于",
+			url: "/about/",
 			icon: "material-symbols:info",
 			children: [
 				{
-					name: "About",
+					name: "关于本站",
 					url: "/about/",
 					icon: "material-symbols:person",
 				},
 				{
-					name: "Friends",
-					url: "/friends/",
-					icon: "material-symbols:group",
+					name: "设备",
+					url: "/devices/",
+					icon: "material-symbols:devices",
+				},
+				{
+					name: "项目",
+					url: "/projects/",
+					icon: "material-symbols:work",
 				},
 			],
 		},
 
-		// 自定义一级下拉菜单示例：其他页面
+		// 自定义一级下拉菜单：更多
 		{
-			name: "Others",
+			name: "更多",
 			url: "#", // "#" 作为占位 URL，点击不会跳转
 			icon: "material-symbols:more-horiz",
 			children: [
 				{
-					name: "Projects",
-					url: "/projects/",
-					icon: "material-symbols:work",
+					name: "日记",
+					url: "/diary/",
+					icon: "material-symbols:book",
 				},
 				{
-					name: "Skills",
-					url: "/skills/",
-					icon: "material-symbols:psychology",
+					name: "GitHub",
+					url: "https://github.com/404-GCross",
+					external: true,
+					icon: "fa7-brands:github",
 				},
-				LinkPreset.AITools,
 				{
-					name: "Timeline",
-					url: "/timeline/",
-					icon: "material-symbols:timeline",
+					name: "Bilibili",
+					url: "https://space.bilibili.com/284794628",
+					external: true,
+					icon: "fa7-brands:bilibili",
+				},
+				{
+					name: "Kungal 论坛",
+					url: "https://www.kungal.com/user/1922",
+					external: true,
+					icon: "material-symbols:forum",
 				},
 			],
 		},
