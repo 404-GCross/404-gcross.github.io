@@ -55,7 +55,7 @@
   `! Cache-Control` 改成 `immutable`；其余（HTML 与 `public/` 下的图片、横幅、favicon 等
   固定文件名资源，字体 woff2 也在 `/_astro/` 下）都是 `max-age=0, must-revalidate`，
   部署后立刻生效。**别再给固定文件名的资源加 `immutable`**：就地替换同名图片时，
-  已经缓存过的浏览器一年内都不会回源（`images/device/rog-zephyrus-g14-air-2025-v2.webp`
+  已经缓存过的浏览器一年内都不会回源（`images/device/rog-zephyrus-g14-air-2025-white.webp`
   就是为此改名的）。GitHub Pages 不支持 `_headers`，这些头只在 Cloudflare 侧生效。
 - 主题没有通用 head 注入点；若升级后统计失效，优先检查 ConfigCarrier 是否被上游改名。
 
