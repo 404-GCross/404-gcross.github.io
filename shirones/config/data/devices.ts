@@ -54,7 +54,7 @@ export const devicesData: DeviceItem[] = [
 		status: "active",
 		specs: "锐龙 AI 9 HX 370 · 2.8K OLED",
 		description: "出门写代码、回家开黑都用它，轻薄也带得动。",
-		image: "/images/device/rog-zephyrus-g14-air-2025-v2.webp",
+		image: "/images/device/rog-zephyrus-g14-air-2025-white.webp",
 		icon: "material-symbols:laptop-mac",
 		year: "2025",
 		link: "https://rog.asus.com.cn/laptops/rog-zephyrus/rog-zephyrus-g14-2025/",
