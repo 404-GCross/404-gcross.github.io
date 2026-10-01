@@ -92,6 +92,7 @@ export const devicesData: DeviceItem[] = [
 		status: "archived",
 		specs: "锐龙 7 8845H · RTX 4060",
 		description: "第二台游戏本，白色机身，如今已经退役收起来了。",
+		image: "/images/device/mechrevo-yilong-15-pro-white.webp",
 		icon: "material-symbols:laptop-mac",
 		year: "2024",
 		link: "https://www.mechrevo.com/cn/products/yi-long-15-pro",
