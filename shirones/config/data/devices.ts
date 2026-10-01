@@ -223,7 +223,7 @@ export const devicesData: DeviceItem[] = [
 		status: "archived",
 		specs: "麒麟 910T · 5.0″",
 		description: "超薄机身加双面玻璃，当年很惊艳的一代。",
-		image: "/images/device/huawei-p7-white.webp",
+		image: "/images/device/huawei-p7-white-v2.webp",
 		icon: "material-symbols:phone-iphone",
 		year: "2014",
 		link: "https://detail.zol.com.cn/cell_phone/index367652.shtml",
