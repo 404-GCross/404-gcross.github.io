@@ -13,7 +13,7 @@ export const projectsData: ProjectItem[] = [
 		category: "desktop",
 		phase: "building",
 		technologies: ["Flutter", "Dart", "Python", "Docker"],
-		icon: "material-symbols:menu-book-outline-rounded",
+		icon: "material-symbols:menu-book-rounded",
 		cover: "/assets/projects/sena-repo.webp",
 		coverAlt: "Sena-Repo 界面预览",
 		featured: true,

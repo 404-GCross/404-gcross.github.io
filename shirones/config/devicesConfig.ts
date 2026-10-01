@@ -19,17 +19,17 @@ export const devicesConfig: DevicesConfig = withUserConfig("devices", {
 		{
 			key: "phone",
 			label: "手机",
-			icon: "material-symbols:smartphone",
+			icon: "material-symbols:phone-iphone",
 		},
 		{
 			key: "tablet",
 			label: "平板",
-			icon: "material-symbols:tablet",
+			icon: "material-symbols:tablet-mac",
 		},
 		{
 			key: "handheld",
 			label: "掌机",
-			icon: "material-symbols:sports-esports",
+			icon: "material-symbols:sports-esports-outline-rounded",
 		},
 		{
 			key: "laptop",
