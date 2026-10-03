@@ -34,5 +34,13 @@ export const profileConfig: ProfileConfig = withUserConfig("profile", {
 			image: "/images/social/kungal.webp",
 			url: "https://www.kungal.com/user/1922",
 		},
+		{
+			// 离线图标集（fa6 / material-symbols / simple-icons）里没有酷安，
+			// 同样走自备 logo 图（取自酷安官网 header 图标）。
+			name: "酷安",
+			icon: "material-symbols:apps",
+			image: "/images/social/coolapk.webp",
+			url: "https://www.coolapk.com/u/24499587",
+		},
 	] as ProfileLinkWithImage[],
 });
