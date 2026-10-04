@@ -35,9 +35,9 @@ export const profileConfig: ProfileConfig = withUserConfig("profile", {
 			url: "https://www.kungal.com/user/1922",
 		},
 		{
-			// 离线图标集（fa6 / material-symbols / simple-icons）里没有酷安，
-			// 同样走自备 logo 图（取自酷安官网 header 图标）。
-			name: "酷安",
+			// 离线图标集（fa6 / material-symbols / simple-icons）里没有 CoolAPK，
+			// 同样走自备 logo 图（取自 coolapk.com 官网 header 图标）。
+			name: "CoolAPK",
 			icon: "material-symbols:apps",
 			image: "/images/social/coolapk.webp",
 			url: "https://www.coolapk.com/u/24499587",

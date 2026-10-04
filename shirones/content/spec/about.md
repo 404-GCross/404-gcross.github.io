@@ -20,7 +20,7 @@ Hi，我是 **川宇不是GCross**，欢迎来到 **404**。
 - GitHub：[404-GCross](https://github.com/404-GCross)
 - Bilibili：[川宇不是GCross](https://space.bilibili.com/284794628)
 - KunGal：[个人主页](https://www.kungal.com/user/1922)
-- 酷安：[个人主页](https://www.coolapk.com/u/24499587)
+- CoolAPK：[个人主页](https://www.coolapk.com/u/24499587)
 
 ## 关于本站
 
