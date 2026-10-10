@@ -1,6 +1,6 @@
 ---
 title: "（本地编译版）如何给你的小米设备编译 Droidspaces 内核"
-published: 2026-10-10
+published: 2026-06-02
 description: "从 WSL 环境准备、镜像源配置，到本地拉取源码编译并刷入 Droidspaces 内核的完整流程，附刷砖后的救砖方法。"
 tags: ["Droidspaces", "内核", "小米", "刷机", "教程"]
 category: "教程"
@@ -9,7 +9,7 @@ draft: false
 
 折腾了两周，做了个本地编译 Droidspaces 内核的脚本，目前适用于 5.10-6.6 的米系 GKI 设备，目前已上传 Github，顺便写下教程讲述如何使用。
 
-> 本文最早以图文形式发布在酷安（2026-06-02）：[查看原文](https://www.coolapk.com/feed/72120278)
+> 本文最早以图文形式发布在酷安：[查看原文](https://www.coolapk.com/feed/72120278)
 
 ## 项目简介
 
