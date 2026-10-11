@@ -29,7 +29,7 @@ draft: false
 ## 目前脚本存在的问题
 
 1. 由于 SUSFS 可能与 Droidspaces 冲突，Droidspaces 作者也不太推荐，因此脚本不支持 SUSFS，并且脚本所提供的额外内核功能未测试，不确定是否可用，现在画个饼，以后支持
-2. Android16-6.12 内核的米系设备暂时不支持，我用我的 K90ProMax 备用机刷入后，卡在 OS 加载界面进不去，搞了三天都没搞明白，所以暂时放弃掉了，当然如果有大佬能告诉我啥问题就再好不过了，6.12 的米系设备用户可以看看[@cctv18_2](https://www.coolapk.com/u/cctv18_2) 大佬的云端编译项目 https://github.com/cctv18/oppo_oplus_realme_sm8850，他的项目里也有本地脚本，不过更推荐直接云端。
+2. Android16-6.12 内核的米系设备暂时不支持，我用我的 K90ProMax 备用机刷入后，卡在 OS 加载界面进不去，搞了三天都没搞明白，所以暂时放弃掉了，当然如果有大佬能告诉我啥问题就再好不过了，6.12 的米系设备用户可以看看[@cctv18_2](https://www.coolapk.com/u/cctv18_2) 大佬的云端编译项目 <https://github.com/cctv18/oppo_oplus_realme_sm8850>，他的项目里也有本地脚本，不过更推荐直接云端。
 3. 如果编译时选择了带 root，无法像云端编译那样下载管理器，因为 Github Action 下载需要登录，只能自行访问 github 下载，脚本会在编译完成后给出获取链接。
 
 ## 准备工作
