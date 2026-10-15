@@ -1,0 +1,79 @@
+name: Probe Hikarinagi (CLI vs browser)
+
+# 临时探测（跑完删）：在 GitHub runner 上试两条「自己过 Cloudflare 挑战」的路子：
+#   1. curl_cffi —— 带 Chrome TLS 指纹的客户端
+#   2. Playwright + Chromium —— 真浏览器执行挑战后读 JSON
+# 目标接口就是每日同步要读的那个（记录列表）。
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Probe
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe with curl_cffi
+        run: |
+          python3 -m pip install -q --disable-pip-version-check curl_cffi
+          python3 - <<'PY'
+          from curl_cffi import requests
+
+          url = "https://www.hikarinagi.org/api/v3/user/45540/rates?work_type=GALGAME&page=1&page_size=5"
+          for name in ["chrome", "chrome131", "chrome124", "safari184"]:
+              try:
+                  r = requests.get(url, impersonate=name, timeout=40)
+                  print(f"curl_cffi[{name}] HTTP {r.status_code} {len(r.content)}B :: {r.text[:120]!r}")
+              except Exception as error:
+                  print(f"curl_cffi[{name}] ERR {type(error).__name__}: {str(error)[:120]}")
+          PY
+
+      - name: Probe with Playwright
+        run: |
+          mkdir -p /tmp/pw && cd /tmp/pw
+          npm init -y >/dev/null 2>&1
+          npm install --no-fund --no-audit playwright >/dev/null 2>&1
+          npx playwright install --with-deps chromium
+          cat > probe.mjs <<'JS'
+          import { chromium } from "playwright";
+
+          const URLS = [
+            "https://www.hikarinagi.org/api/v3/user/45540/rates?work_type=GALGAME&page=1&page_size=5",
+            "https://api.hikarinagi.org/v3/galgames/5",
+          ];
+
+          const browser = await chromium.launch({
+            headless: true,
+            args: ["--disable-blink-features=AutomationControlled"],
+          });
+          const context = await browser.newContext({
+            userAgent:
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            locale: "zh-CN",
+            timezoneId: "Asia/Shanghai",
+            viewport: { width: 1280, height: 900 },
+            extraHTTPHeaders: { "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8" },
+          });
+          const page = await context.newPage();
+
+          async function grab(url) {
+            const started = Date.now();
+            await page.goto(url, { waitUntil: "domcontentloaded", timeout: 45000 }).catch(() => {});
+            for (let i = 0; i < 20; i += 1) {
+              const text = await page.evaluate(() => document.body?.innerText ?? "");
+              if (text.trim().startsWith("{")) {
+                return `OK ${Date.now() - started}ms ${text.length}B :: ${text.slice(0, 120)}`;
+              }
+              await page.waitForTimeout(1500);
+              if (i % 3 === 2) await page.reload({ waitUntil: "domcontentloaded" }).catch(() => {});
+            }
+            const tail = await page.evaluate(() => (document.body?.innerText ?? "").slice(0, 80));
+            return `FAIL ${Date.now() - started}ms :: ${JSON.stringify(tail)}`;
+          }
+
+          for (const url of URLS) console.log(`playwright ${url} -> ${await grab(url)}`);
+          await browser.close();
+          JS
+          node probe.mjs
