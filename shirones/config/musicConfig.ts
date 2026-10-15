@@ -65,7 +65,8 @@ export const musicConfig: MusicConfig = withUserConfig("music", {
 		server: "netease",
 		type: "playlist",
 		id: "7414172754",
-		api: "https://meting.mysqil.com/api?server=:server&type=:type&id=:id&auth=:auth&r=:r",
+		// 不指定 api，回落主题默认的 https://api.injahow.cn/meting/
+		// （原先自配的 meting.mysqil.com 已无 DNS 记录，会导致「该音源不可用」）
 		// 进入视口时预取歌单元数据（仅元信息，不预取音频流）：
 		// "metadata"（取）| "none"（默认，不取；交互后才请求，卡片显示「尚未请求」占位）
 		preload: "metadata",
