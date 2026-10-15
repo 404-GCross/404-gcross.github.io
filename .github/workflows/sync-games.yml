@@ -31,10 +31,24 @@ jobs:
       - name: Install ImageMagick
         run: sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick
 
-      # Hikarinagi 对数据中心 IP 一律发 Cloudflare 挑战，脚本会直连失败后
-      # 改走 r.jina.ai 取正文；这里不预设通道，只看结果。
+      # 带浏览器指纹的取数客户端：Hikarinagi 对数据中心 IP 一律发 Cloudflare 挑战，
+      # 裸 curl / Node fetch 都拿不到数据，curl_cffi 可以（实测最新 chrome 与 safari 指纹通过）。
+      - name: Install curl_cffi
+        run: python3 -m pip install -q --disable-pip-version-check curl_cffi
+
+      # 三档取数：脚本内直连 → curl_cffi 辅助程序 → r.jina.ai。
+      # 万一指纹策略变了，这里再装一次真浏览器（Playwright，脚本用真浏览器过 JS 挑战）重试一遍，
+      # 日常不装、不跑。
       - name: Sync records
-        run: node scripts/sync-hikarinagi.mjs
+        run: |
+          export HIKARINAGI_FETCH_CMD="python3 scripts/fetch-impersonate.py"
+          if node scripts/sync-hikarinagi.mjs; then
+            exit 0
+          fi
+          echo "::warning::curl_cffi 通道失败，改用它前先装真浏览器重试"
+          npm install --no-save --no-fund --no-audit playwright
+          npx playwright install chromium
+          HIKARINAGI_FETCH_CMD="node scripts/fetch-via-browser.mjs" node scripts/sync-hikarinagi.mjs
 
       - name: Commit when the data changed
         run: |

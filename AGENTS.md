@@ -23,6 +23,7 @@
 | `shirones/content/moments/` | 日记目录（本站已关闭日记，仅留占位） |
 | `shirones/content/spec/about.md` | 「关于」页内容 |
 | `scripts/sync-hikarinagi.mjs` | 从 Hikarinagi 同步 Galgame 记录，生成 `shirones/config/data/games.ts` 与游戏封面（作品事实缓存 `scripts/cache/hikarinagi.json` 随仓库提交） |
+| `scripts/fetch-impersonate.py` / `scripts/fetch-via-browser.mjs` | 取数辅助程序：CI 里用浏览器指纹 / 真浏览器过 Cloudflare 挑战（本地直连用不到） |
 | `src/pages/privacy.astro` | 站点自有的「隐私说明」页（主题没有此页） |
 | `src/pages/games.astro` | 覆盖主题的游戏页：只补一行 Hikarinagi 署名（来源标注是对方的硬性要求） |
 | `src/components/` | 覆盖主题组件的目录：`system/ConfigCarrier.astro`（挂载 Clarity + 站点级样式微调）、`molecules/SiteStats.astro`（关闭日记后隐藏「动态」统计行）、`organisms/Profile.astro`（让社交链接支持自备图片 logo） |
@@ -60,8 +61,12 @@
   重跑：`node scripts/sync-hikarinagi.mjs`（`--refresh` 强制重取）。
   **取数通道有个坑**：Hikarinagi 对数据中心 IP 一律发 Cloudflare 挑战——GitHub runner、代理出口、
   连 Cloudflare Pages Functions 自己的出口都实测 403（Just a moment），住宅网络直连才通；
-  官方开放 API（`api.hikarinagi.org`）同样在挑战后面，换过去也解决不了。所以脚本是
-  「直连优先，被挑战就改走 `r.jina.ai` 读正文」，而封面走的 `imagesp.yurari.moe` 不在挑战后面、
+  官方开放 API（`api.hikarinagi.org`）同样在挑战后面。脚本因此分三档取数：
+  **直连 → 辅助程序（`HIKARINAGI_FETCH_CMD`）→ `r.jina.ai`**。CI 里辅助程序是
+  `scripts/fetch-impersonate.py`（curl_cffi，浏览器 TLS 指纹；实测「最新 chrome」「safari184」
+  能过，而固定的旧版本如 chrome131/chrome124 会被挑战，所以脚本用跟随最新版的别名）；
+  它失败时 workflow 会临时装 Playwright、换成 `scripts/fetch-via-browser.mjs`（真浏览器执行
+  JS 挑战，实测 200ms 直接拿到 JSON）再跑一遍。封面走的 `imagesp.yurari.moe` 不在挑战后面，
   CI 可直连。`.github/workflows/sync-games.yml` 每天北京时间 04:00 跑一次（runner 要临时装
   ImageMagick 才有 `convert`），只在数据有变化时提交。两条不能丢的约定：卡片外链指向作品在
   Hikarinagi 的页面、页面保留署名行（对方的品牌与署名要求）。状态映射：在玩→`playing`、

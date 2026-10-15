@@ -19,8 +19,9 @@
  *   挑战后面，换过去也解决不了 CI 取数问题。
  * - **Hikarinagi 对数据中心 IP 一律发 Cloudflare 挑战**：GitHub runner、代理出口、
  *   连 Cloudflare Pages Functions 自己的出口都被挡（实测 403 Just a moment），
- *   住宅网络直连才通。因此取数是「直连优先，被挡则改走 r.jina.ai 读正文」，
- *   后者返回的是把 JSON 包在正文里的文本，这里截取首尾大括号还原。
+ *   住宅网络直连才通。取数因此分三档：直连 → 外部辅助程序
+ *   （HIKARINAGI_FETCH_CMD，CI 里给的是 scripts/fetch-impersonate.py 这种带浏览器
+ *   指纹的客户端）→ r.jina.ai 读正文（截首尾大括号还原 JSON）。
  * - 详情按作品缓存在 scripts/cache/hikarinagi.json：只有新条目或换过 rate_id 的
  *   条目才会再取详情。这样每日自动同步的正常开销只有 1 个「记录列表」请求
  *   （外加新增作品的少量请求），既快又不至于把公共 reader 当自家接口刷。
@@ -95,41 +96,71 @@ function isChallenge(status, text) {
 }
 
 /**
- * 取一段 JSON 正文：直连优先，被 Cloudflare 挑战时改走 r.jina.ai。
- * 返回解析后的对象。
+ * 取数通道（按顺序尝试，逐级变重）：
+ *   1. 直连            —— 住宅网络可用，零依赖
+ *   2. 外部辅助程序     —— HIKARINAGI_FETCH_CMD 指定，CI 里是带浏览器指纹的 curl_cffi，
+ *                        失败后 workflow 会换成 Playwright 真浏览器再来一次
+ *   3. r.jina.ai       —— 第三方 reader，最后的兜底
+ * 注意 Hikarinagi 对数据中心 IP 一律发 Cloudflare 挑战：runner、代理出口、连
+ * Cloudflare Pages Functions 自己的出口都过不去，所以 CI 必须靠 2 或 3。
  */
+const HELPER_CMD = (process.env.HIKARINAGI_FETCH_CMD ?? "").trim();
+let usedChannel = "";
+
+/** 1. 直连 */
+async function fetchDirect(url) {
+	const res = await fetch(url, { headers: { Accept: "application/json", "User-Agent": UA } });
+	const body = await res.text();
+	if (isChallenge(res.status, body)) throw new Error("被 Cloudflare 挑战");
+	return body;
+}
+
+/** 2. 外部辅助程序：把 URL 交给它，stdout 即正文 */
+async function fetchViaHelper(url) {
+	if (!HELPER_CMD) throw new Error("未配置 HIKARINAGI_FETCH_CMD");
+	return execFileSync("bash", ["-c", `${HELPER_CMD} "$1"`, "_", url], {
+		encoding: "utf8",
+		maxBuffer: 32 * 1024 * 1024,
+		timeout: 240000,
+	});
+}
+
+/** 3. r.jina.ai：返回的是把 JSON 包在正文里的文本，截首尾大括号还原 */
+async function fetchViaReader(url) {
+	const res = await fetch(JINA_PREFIX + url, { headers: { Accept: "text/plain" } });
+	const wrapped = await res.text();
+	const start = wrapped.indexOf("{");
+	const end = wrapped.lastIndexOf("}");
+	if (!res.ok || start < 0 || end <= start) {
+		throw new Error(`HTTP ${res.status}`);
+	}
+	return wrapped.slice(start, end + 1);
+}
+
+const TIERS = [
+	["直连", fetchDirect],
+	["辅助程序", fetchViaHelper],
+	["r.jina.ai", fetchViaReader],
+];
+
+/** 按通道顺序取一段 JSON，返回解析后的 data */
 async function getJson(path) {
 	const url = BASE + path;
-	let text;
-	let directError = "直连失败";
-	try {
-		const res = await fetch(url, { headers: { Accept: "application/json", "User-Agent": UA } });
-		const body = await res.text();
-		if (res.ok && body.trimStart().startsWith("{")) text = body;
-		else if (!isChallenge(res.status, body)) {
-			// 非挑战的响应（例如 401/404 的业务错误）直接交给下面的 JSON 解析报错
-			text = body;
-		} else {
-			directError = "直连被 Cloudflare 挑战";
+	const failures = [];
+	for (const [name, tier] of TIERS) {
+		try {
+			const body = JSON.parse(await tier(url));
+			if (!body?.success) throw new Error(body?.error?.code ?? "接口返回失败");
+			if (usedChannel !== name) {
+				usedChannel = name;
+				console.log(`   · 取数通道：${name}`);
+			}
+			return body.data;
+		} catch (error) {
+			failures.push(`${name}(${error.message})`);
 		}
-	} catch (error) {
-		directError = `直连失败：${error.message}`;
 	}
-
-	if (text === undefined) {
-		const res = await fetch(JINA_PREFIX + url, { headers: { Accept: "text/plain" } });
-		const wrapped = await res.text();
-		const start = wrapped.indexOf("{");
-		const end = wrapped.lastIndexOf("}");
-		if (!res.ok || start < 0 || end <= start) {
-			throw new Error(`${path}: ${directError}，r.jina.ai 兜底也失败（HTTP ${res.status}）`);
-		}
-		text = wrapped.slice(start, end + 1);
-	}
-
-	const body = JSON.parse(text);
-	if (!body?.success) throw new Error(`${path}: ${body?.error?.code ?? "接口返回失败"}`);
-	return body.data;
+	throw new Error(`${path}：所有通道都失败 —— ${failures.join(" / ")}`);
 }
 
 /** 带退避重试的取数 */
@@ -376,6 +407,7 @@ async function main() {
 	writeFileSync(OUT_FILE, render(games));
 	console.log(`写入 ${OUT_FILE.replace(`${ROOT}/`, "")}`);
 	console.log(`  条目 ${games.length} 条，带封面 ${games.filter((game) => game.cover).length} 条`);
+	console.log(`  取数通道：${usedChannel || "直连"}`);
 }
 
 main().catch((error) => {
