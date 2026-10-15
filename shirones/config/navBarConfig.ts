@@ -145,7 +145,6 @@ const defaultNavBarConfig: NavBarConfig = {
 		LinkPresets.Archive,
 		LinkPresets.Friends,
 		LinkPresets.Devices,
-		LinkPresets.Games,
 		LinkPresets.Projects,
 		{
 			name: i18n(I18nKey.about),
