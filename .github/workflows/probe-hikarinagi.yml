@@ -1,7 +1,7 @@
-name: Probe Hikarinagi
+name: Probe Hikarinagi (proxies)
 
-# 临时探测：从 GitHub runner 上看，Hikarinagi 的哪些主机不被 Cloudflare 挑战。
-# 用途见 scripts/sync-hikarinagi.mjs 的说明（同步必须能找到一条 runner 可用的路）。
+# 临时探测：runner 上哪些「取数通道」能拿到 Hikarinagi 的 JSON。
+# 目标接口是同步脚本每天要读的那一个（记录列表）。
 on:
   workflow_dispatch:
 
@@ -12,18 +12,21 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe hosts
+      - name: Probe fetch paths
         run: |
+          TARGET="https://www.hikarinagi.org/api/v3/user/45540/rates?work_type=GALGAME&page=1&page_size=5"
+          ENC=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$TARGET")
           for url in \
-            "https://www.hikarinagi.org/api/v3/user/45540/statistics" \
-            "https://api.hikarinagi.org/v3/galgames/5" \
-            "https://api.hikarinagi.org/v3/open/galgames/5" \
-            "https://id.hikarinagi.org/oidc/.well-known/openid-configuration" \
-            "https://imagesp.yurari.moe/images/531df6a9-db30-4a91-a76d-d13c60b38ede.webp" \
-            "https://r.jina.ai/https://www.hikarinagi.org/api/v3/user/45540/statistics" ; do
-            code=$(curl -s -o /tmp/out -w "%{http_code}" -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/121 Safari/537.36" --max-time 30 "$url")
-            echo "HTTP $code  $url"
-            head -c 140 /tmp/out | tr -d '\n'
+            "$TARGET" \
+            "https://api.allorigins.win/raw?url=$ENC" \
+            "https://corsproxy.io/?url=$ENC" \
+            "https://api.codetabs.com/v1/proxy?quest=$ENC" \
+            "https://cors.isomorphic-git.org/$TARGET" \
+            "https://r.jina.ai/$TARGET" ; do
+            code=$(curl -s -o /tmp/out -w "%{http_code}" -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/121 Safari/537.36" --max-time 45 "$url")
+            size=$(wc -c < /tmp/out)
+            echo "HTTP $code  ${size}B  $url"
+            head -c 160 /tmp/out | tr -d '\n'
             echo
             echo "-----"
           done
