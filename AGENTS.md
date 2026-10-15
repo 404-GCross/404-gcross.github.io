@@ -18,14 +18,16 @@
 | --- | --- |
 | `astro.config.mjs` | 唯一的 Astro 配置，挂载 `shirones()` 并声明 `excludeRoutes` |
 | `shirones/config/*.ts` | 站点配置（站点身份、导航、侧栏、设备、项目、音乐、评论……） |
-| `shirones/config/data/*.ts` | 纯内容数据（设备、项目、友链、音乐） |
+| `shirones/config/data/*.ts` | 纯内容数据（设备、项目、友链、音乐、游戏） |
 | `shirones/content/posts/` | 文章 |
 | `shirones/content/moments/` | 日记目录（本站已关闭日记，仅留占位） |
 | `shirones/content/spec/about.md` | 「关于」页内容 |
+| `scripts/sync-hikarinagi.mjs` | 从 Hikarinagi 同步 Galgame 记录，生成 `shirones/config/data/games.ts` 与游戏封面 |
 | `src/pages/privacy.astro` | 站点自有的「隐私说明」页（主题没有此页） |
+| `src/pages/games.astro` | 覆盖主题的游戏页：只补一行 Hikarinagi 署名（来源标注是对方的硬性要求） |
 | `src/components/` | 覆盖主题组件的目录：`system/ConfigCarrier.astro`（挂载 Clarity + 站点级样式微调）、`molecules/SiteStats.astro`（关闭日记后隐藏「动态」统计行）、`organisms/Profile.astro`（让社交链接支持自备图片 logo） |
-| `public/` | 静态资源：banner、设备图、项目封面、favicon、`_headers` |
-| `.github/workflows/` | 三个 CI workflow |
+| `public/` | 静态资源：banner、设备图、项目封面、游戏封面、favicon、`_headers` |
+| `.github/workflows/` | 四个 CI workflow（Lint / Cloudflare / GitHub Pages + 每日同步游戏记录） |
 
 ## 站点定制时的注意事项
 
@@ -35,10 +37,10 @@
   `src/components/organisms/Profile.astro` 这份覆盖（links 里额外支持可选的 `image` 字段）。
 - **关闭页面**要两处同时改：对应配置里的 `enable: false`（导航自动裁剪），以及
   `astro.config.mjs` 的 `excludeRoutes`（不产出路由）。当前关闭：日记、番剧、相册、技能、时间线、
-  游戏、站点罗盘、系列。
+  站点罗盘、系列。
 - **访问统计**是 Microsoft Clarity（`yqdo4s8yn8`），通过覆盖 `src/components/system/ConfigCarrier.astro`
   注入：尊重 DNT，首次交互或 10 秒后才加载。主题自带的 umami 配置保持关闭。
-- **站点级样式微调**也挂在 `ConfigCarrier.astro`（它只渲染一次）：目前三条 —— ① 让「关于」下拉按内容撑宽、
+- **站点级样式微调**也挂在 `ConfigCarrier.astro`（它只渲染一次）：目前四条 —— ① 让「关于」下拉按内容撑宽、
   避免长条目折行；② 把 `--banner-stage-height` 拉到 `100vh`，但**只在首页生效**
   （`:root:root:has(body[data-current-page="home"])`）。主题只有 `banner` / `none` 两种背景，
   没有 Mizuki 的 `fullscreen`/`overlay`；`body` 的 `data-current-page` 由主题在 Swup 导航时同步，
@@ -47,6 +49,19 @@
   只留图片、名称/品牌/年份/状态和「查看详情」。这两块**内容仍保留在 `shirones/config/data/devices.ts`**：
   `DeviceItem` 里 `specs` / `description` 是必填字段，删了过不了 `astro check`，而且设备页的搜索
   会拿它们当匹配字段。改卡片只需动这条 CSS，别去删数据。
+  ④ 游戏卡片竖版化：主题的卡片是为 16:9 横版封面设计的，而 `games.ts` 里全是 2:3 竖版
+  Galgame 封面，于是把 `.game-card__banner` 的 `aspect-ratio` 改成 `2 / 3`、把
+  `.games-section__grid` 的列宽从 20rem 收到 10.5rem（变成封面墙）。改这两条就够了，
+  别去覆盖主题的 GameCard 组件。
+- **游戏页**（`/games/`）的数据由脚本同步，**别手改 `shirones/config/data/games.ts`**：
+  `scripts/sync-hikarinagi.mjs` 拉 Hikarinagi 的状态与评分记录（走站内接口 `/api/v3/user/…`，
+  必须直连——被标记的代理出口会吃 Cloudflare 挑战），竖版封面优先，只有横版图时在本地
+  合成为 600×900 的竖版图，落到 `public/images/games/<作品ID>.webp`。重跑：
+  `node scripts/sync-hikarinagi.mjs`（已有封面跳过下载，`--refresh` 强制重取）。
+  `.github/workflows/sync-games.yml` 每天北京时间 04:00 跑一次，只在数据有变化时提交。
+  两条不能丢的约定：卡片外链指向作品在 Hikarinagi 的页面、页面保留署名行（对方开放接口的
+  品牌与署名要求）。状态映射：在玩→`playing`、已通关→`completed`、搁置/弃坑→`backlog`、
+  想玩→`wishlist`。
 - **侧栏「运行天数」**不用主题的 `stats.days`（它以最早一篇文章的发布日为起点，且构建时写死），
   而是读 `shirones/config/siteConfig.ts` 里本地扩展的 `siteStartDate`（主题类型没有这个字段，
   消费侧断言取用），按站点时区 `timeZone` 的自然日算「第 N 天」；覆盖版

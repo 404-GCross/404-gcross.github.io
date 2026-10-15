@@ -32,7 +32,10 @@ const textureOptions = resolveTextureOptions();
 	3) 设备卡片只留名称/品牌/年份/状态/图片/按钮，隐藏规格行与简评。
 	   数据仍保留在 shirones/config/data/devices.ts（DeviceItem 里 specs /
 	   description 是必填字段，删了过不了类型检查，且设备页搜索会用到它们）。
--->
+	4) 游戏卡片改成竖版封面墙：主题的卡片是为 16:9 横版封面设计的，
+	   而这里的条目全是 2:3 竖版 Galgame 封面，把横幅比例与网格列宽换成
+	   竖版后封面完整铺满、不再裁切（同步脚本也已保证只有横版图时合成竖版）。
+--> 
 <style is:global>
 	.top-app-bar__submenu {
 		width: max-content;
@@ -51,6 +54,20 @@ const textureOptions = resolveTextureOptions();
 	:root:root .device-card__specs,
 	:root:root .device-card__description {
 		display: none;
+	}
+
+	/* 游戏卡片竖版化：横幅比例 16:9 → 2:3，网格列宽 20rem → 10.5rem，
+	   标题在窄卡片下略收一号。 */
+	:root:root .games-section__grid {
+		grid-template-columns: repeat(auto-fill, minmax(min(100%, 10.5rem), 1fr));
+	}
+
+	:root:root .game-card__banner {
+		aspect-ratio: 2 / 3;
+	}
+
+	:root:root .game-card__title {
+		font-size: 0.95rem;
 	}
 </style>
 

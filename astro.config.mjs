@@ -15,7 +15,6 @@ export default defineConfig({
 				"/albums/[id]",
 				"/skills",
 				"/timeline",
-				"/games",
 				"/compass",
 				"/series",
 				"/series/[slug]",
