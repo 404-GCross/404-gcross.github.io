@@ -3,26 +3,31 @@
  * 从 Hikarinagi 同步「状态与评分记录」到游戏页数据。
  *
  * 用法：
- *   node scripts/sync-hikarinagi.mjs            # 同步（已有封面跳过下载）
+ *   node scripts/sync-hikarinagi.mjs            # 同步（有缓存就不重复取详情）
  *   node scripts/sync-hikarinagi.mjs --refresh  # 忽略缓存与已有封面，全部重取
  *   node scripts/sync-hikarinagi.mjs --user 45540
  *
  * 输出：
- *   shirones/config/data/games.ts        生成的数据文件（勿手改，改脚本再跑）
- *   public/images/games/<作品ID>.webp    竖版封面
+ *   shirones/config/data/games.ts         生成的数据文件（勿手改，改脚本再跑）
+ *   public/images/games/<作品ID>.webp     竖版封面
+ *   scripts/cache/hikarinagi.json         作品事实缓存（随仓库提交，见下）
  *
- * 数据来源与取舍：
- * - 走的是 Hikarinagi 网站自身的接口（www.hikarinagi.org/api/v3/…），不需要令牌。
+ * 数据来源与取数通道：
+ * - 走 Hikarinagi 网站自身的接口（www.hikarinagi.org/api/v3/…），不需要令牌；
  *   官方另有开发者开放 API（api.hikarinagi.org/v3/…，OIDC 发令牌，见
- *   https://www.hikarinagi.org/developers/guide），更稳但需注册应用并走一次
- *   授权码流程；若站内接口哪天变了，改用开放 API 的 /v3/user/me/rates 与
- *   /v3/galgames/{id} 即可，字段基本对应（RateWorkDto / GalgameDto）。
- * - 按 Hikarinagi 的品牌与署名要求：卡片外链指向作品在 Hikarinagi 的页面，
- *   页面另有一行「数据来自 Hikarinagi」署名（见 src/pages/games.astro）。
- * - 站点前有 Cloudflare 挑战（按 IP 信誉判定）：本机直连可过，被标记的代理出口
- *   会被拦。Node 的 fetch 默认不读 http_proxy 环境变量，正好走直连。
- * - 接口限速未知：固定 1 秒 1 个请求 + 退避重试；成功响应缓存在
- *   node_modules/.cache/hikarinagi 下，重跑不重复请求。
+ *   https://www.hikarinagi.org/developers/guide），但那个域名同样在 Cloudflare
+ *   挑战后面，换过去也解决不了 CI 取数问题。
+ * - **Hikarinagi 对数据中心 IP 一律发 Cloudflare 挑战**：GitHub runner、代理出口、
+ *   连 Cloudflare Pages Functions 自己的出口都被挡（实测 403 Just a moment），
+ *   住宅网络直连才通。因此取数是「直连优先，被挡则改走 r.jina.ai 读正文」，
+ *   后者返回的是把 JSON 包在正文里的文本，这里截取首尾大括号还原。
+ * - 详情按作品缓存在 scripts/cache/hikarinagi.json：只有新条目或换过 rate_id 的
+ *   条目才会再取详情。这样每日自动同步的正常开销只有 1 个「记录列表」请求
+ *   （外加新增作品的少量请求），既快又不至于把公共 reader 当自家接口刷。
+ * - 封面走 imagesp.yurari.moe（不在挑战后面，CI 可直连）。
+ *
+ * 署名：按 Hikarinagi 的品牌与署名要求，卡片外链指向作品在 Hikarinagi 的页面，
+ * 页面另有一行「数据来自 Hikarinagi」署名（见 src/pages/games.astro）。
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -32,11 +37,15 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const BASE = "https://www.hikarinagi.org";
 const IMAGE_BASE = "https://imagesp.yurari.moe";
-const CACHE_DIR = join(ROOT, "node_modules/.cache/hikarinagi");
+const JINA_PREFIX = "https://r.jina.ai/";
+const CACHE_FILE = join(ROOT, "scripts/cache/hikarinagi.json");
+const SCRATCH_DIR = join(ROOT, "node_modules/.cache/hikarinagi");
 const COVER_DIR = join(ROOT, "public/images/games");
 const OUT_FILE = join(ROOT, "shirones/config/data/games.ts");
 const COVER_WIDTH = 600; // 卡片实际显示约 170–240px，600 宽够 2x
 const COVER_HEIGHT = 900;
+const UA =
+	"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/121 Safari/537.36";
 
 const args = process.argv.slice(2);
 const REFRESH = args.includes("--refresh");
@@ -80,36 +89,83 @@ const PLATFORM_MAP = {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function api(path, { retries = 3 } = {}) {
-	const cacheFile = join(CACHE_DIR, path.replace(/[^a-z0-9]+/gi, "_") + ".json");
-	if (!REFRESH && existsSync(cacheFile)) {
-		try {
-			return JSON.parse(readFileSync(cacheFile, "utf8"));
-		} catch {
-			// 缓存损坏则重新请求
+/** Cloudflare 挑战页的特征（JSON 接口不可能长这样） */
+function isChallenge(status, text) {
+	return status === 403 && /Just a moment|cf-challenge|challenge-platform/i.test(text);
+}
+
+/**
+ * 取一段 JSON 正文：直连优先，被 Cloudflare 挑战时改走 r.jina.ai。
+ * 返回解析后的对象。
+ */
+async function getJson(path) {
+	const url = BASE + path;
+	let text;
+	let directError = "直连失败";
+	try {
+		const res = await fetch(url, { headers: { Accept: "application/json", "User-Agent": UA } });
+		const body = await res.text();
+		if (res.ok && body.trimStart().startsWith("{")) text = body;
+		else if (!isChallenge(res.status, body)) {
+			// 非挑战的响应（例如 401/404 的业务错误）直接交给下面的 JSON 解析报错
+			text = body;
+		} else {
+			directError = "直连被 Cloudflare 挑战";
 		}
+	} catch (error) {
+		directError = `直连失败：${error.message}`;
 	}
-	for (let attempt = 0; attempt <= retries; attempt += 1) {
+
+	if (text === undefined) {
+		const res = await fetch(JINA_PREFIX + url, { headers: { Accept: "text/plain" } });
+		const wrapped = await res.text();
+		const start = wrapped.indexOf("{");
+		const end = wrapped.lastIndexOf("}");
+		if (!res.ok || start < 0 || end <= start) {
+			throw new Error(`${path}: ${directError}，r.jina.ai 兜底也失败（HTTP ${res.status}）`);
+		}
+		text = wrapped.slice(start, end + 1);
+	}
+
+	const body = JSON.parse(text);
+	if (!body?.success) throw new Error(`${path}: ${body?.error?.code ?? "接口返回失败"}`);
+	return body.data;
+}
+
+/** 带退避重试的取数 */
+async function api(path, { retries = 2 } = {}) {
+	for (let attempt = 0; ; attempt += 1) {
 		try {
-			const res = await fetch(BASE + path, {
-				headers: {
-					Accept: "application/json",
-					"User-Agent":
-						"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/121 Safari/537.36",
-				},
-			});
-			const body = await res.json();
-			if (!body?.success) throw new Error(body?.error?.code ?? `HTTP ${res.status}`);
-			mkdirSync(CACHE_DIR, { recursive: true });
-			writeFileSync(cacheFile, JSON.stringify(body.data));
-			await sleep(1000);
-			return body.data;
+			const data = await getJson(path);
+			await sleep(1000); // 对公共 reader 保持克制
+			return data;
 		} catch (error) {
-			if (attempt === retries) throw new Error(`${path}: ${error.message}`);
+			if (attempt >= retries) throw error;
 			await sleep(3000 * (attempt + 1));
 		}
 	}
-	return undefined;
+}
+
+function readCache() {
+	try {
+		const parsed = JSON.parse(readFileSync(CACHE_FILE, "utf8"));
+		if (parsed && typeof parsed.works === "object") return parsed;
+	} catch {
+		// 没缓存或缓存损坏：当作空缓存，下面会重新取
+	}
+	return { works: {} };
+}
+
+function writeCache(cache) {
+	mkdirSync(dirname(CACHE_FILE), { recursive: true });
+	const sorted = {};
+	for (const id of Object.keys(cache.works).sort((a, b) => Number(a) - Number(b))) {
+		sorted[id] = cache.works[id];
+	}
+	writeFileSync(
+		CACHE_FILE,
+		`${JSON.stringify({ note: "由 scripts/sync-hikarinagi.mjs 维护的作品事实缓存，随仓库提交以便每日同步只取变化的部分。", works: sorted }, null, "\t")}\n`,
+	);
 }
 
 /** 折叠空白；超长简介在句子边界截断 */
@@ -145,19 +201,15 @@ function buildCover(id, cover) {
 	const out = join(COVER_DIR, `${id}.webp`);
 	if (!REFRESH && existsSync(out)) return false;
 	mkdirSync(COVER_DIR, { recursive: true });
-	mkdirSync(CACHE_DIR, { recursive: true });
-	const raw = join(CACHE_DIR, `cover-${id}.src`);
+	mkdirSync(SCRATCH_DIR, { recursive: true });
+	const raw = join(SCRATCH_DIR, `cover-${id}.src`);
 	const size = `${COVER_WIDTH}x${COVER_HEIGHT}`;
 	try {
-		execFileSync("curl", [
-			"-sS", "--fail", "--max-time", "60",
-			"-A", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/121 Safari/537.36",
-			"-o", raw, `${IMAGE_BASE}/${cover.src}`,
-		]);
+		execFileSync("curl", ["-sS", "--fail", "--max-time", "60", "-A", UA, "-o", raw, `${IMAGE_BASE}/${cover.src}`]);
 		if ((cover.height ?? 0) > (cover.width ?? 0)) {
 			execFileSync("convert", [raw, "-resize", `${size}>`, "-strip", "-quality", "82", out]);
 		} else {
-			const backdrop = join(CACHE_DIR, `cover-${id}.bg.png`);
+			const backdrop = join(SCRATCH_DIR, `cover-${id}.bg.png`);
 			execFileSync("convert", [
 				raw, "-resize", `${size}^`, "-gravity", "center", "-extent", size,
 				"-blur", "0x26", "-modulate", "58,80", "-strip", backdrop,
@@ -172,6 +224,56 @@ function buildCover(id, cover) {
 		console.warn(`   ! 封面处理失败 ${id}（${cover.src}）：${error.message}`);
 		return false;
 	}
+}
+
+/** 取一部作品的事实（详情 + 厂商），带缓存 */
+async function fetchFacts(id, cache) {
+	const cached = cache.works[id];
+	if (!REFRESH && cached) return cached;
+
+	const [work, producers] = await Promise.all([
+		api(`/api/v3/galgames/${id}`),
+		api(`/api/v3/galgames/${id}/producers`),
+	]);
+	const byRole = (role) =>
+		(producers ?? [])
+			.filter((item) => item.role === role)
+			.map((item) => item.producer?.name)
+			.filter(Boolean);
+	const cover = pickCover(work?.covers);
+	const facts = {
+		title: (work?.trans_title || work?.origin_title || "").trim(),
+		year: work?.release_date
+			? work.release_date.slice(0, 4)
+			: work?.release_date_tbd
+				? "TBA"
+				: "",
+		platforms: (work?.platforms ?? []).map((code) => PLATFORM_MAP[code]).filter(Boolean),
+		intro: condense(work?.trans_intro || work?.origin_intro || work?.en_intro),
+		nsfw: Boolean(work?.nsfw) || Boolean(cover?.nsfw) || (cover?.sexual ?? 0) > 0,
+		developers: byRole("DEVELOPER"),
+		publishers: byRole("PUBLISHER"),
+		cover: cover ? { src: cover.src, width: cover.width ?? 0, height: cover.height ?? 0 } : null,
+	};
+	cache.works[id] = facts;
+	console.log(`   · 取详情 ${id}`);
+	return facts;
+}
+
+/** 取某条记录自己的游玩时长（按 rate_id 缓存，重新评分会自动失效） */
+async function fetchMinutes(id, rateId, cache) {
+	const facts = cache.works[id];
+	if (!REFRESH && facts?.rate_id === rateId && facts.minutes !== undefined) {
+		return facts.minutes;
+	}
+	const own = await api(`/api/v3/galgames/${id}/rates/${rateId}`);
+	const minutes = own?.time_to_finish_minutes ?? 0;
+	if (facts) {
+		facts.rate_id = rateId;
+		facts.minutes = minutes;
+	}
+	console.log(`   · 取时长 ${id}`);
+	return minutes;
 }
 
 const quote = (value) => `"${String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
@@ -228,60 +330,43 @@ async function main() {
 		`  记录 ${rates.length} 条${expected === undefined ? "" : `（站点统计 ${expected} 条）`}`,
 	);
 
+	const cache = readCache();
 	const games = [];
 	for (const [index, rate] of rates.entries()) {
-		const id = rate.id;
-		const [work, producers, own] = await Promise.all([
-			api(`/api/v3/galgames/${id}`),
-			api(`/api/v3/galgames/${id}/producers`),
-			api(`/api/v3/galgames/${id}/rates/${rate.rate_id}`),
-		]);
-
-		const cover =
-			pickCover(work?.covers) ??
-			(rate.cover
-				? { src: rate.cover.src, width: rate.cover.width, height: rate.cover.height }
-				: null);
-		if (cover?.src && buildCover(id, cover)) console.log(`   ↓ 封面 ${id}`);
+		const id = String(rate.id);
+		const facts = await fetchFacts(id, cache);
+		const minutes = await fetchMinutes(id, rate.rate_id, cache);
+		if (facts.cover && buildCover(id, facts.cover)) console.log(`   ↓ 封面 ${id}`);
 		const coverPath = existsSync(join(COVER_DIR, `${id}.webp`))
 			? `/images/games/${id}.webp`
 			: undefined;
 
-		const byRole = (role) =>
-			(producers ?? [])
-				.filter((item) => item.role === role)
-				.map((item) => item.producer?.name)
-				.filter(Boolean);
-		const developers = byRole("DEVELOPER");
-		const publishers = byRole("PUBLISHER");
-		const platforms = (work?.platforms ?? []).map((code) => PLATFORM_MAP[code]).filter(Boolean);
-		const year = work?.release_date
-			? work.release_date.slice(0, 4)
-			: work?.release_date_tbd
-				? "TBA"
-				: "";
-		const minutes = own?.time_to_finish_minutes ?? 0;
-		const intro = condense(work?.trans_intro || work?.origin_intro || work?.en_intro);
 		const status = STATUS_MAP[rate.status] ?? "backlog";
-		const name = (work?.trans_title || work?.origin_title || rate.title || "").trim();
+		const name = (facts.title || rate.title || "").trim();
+		const developers = facts.developers.length > 0 ? facts.developers : facts.publishers;
 
 		games.push({
-			id: String(id),
+			id,
 			name,
-			developer:
-				(developers.length > 0 ? developers : publishers).slice(0, 2).join(" / ") || "未知",
+			developer: developers.slice(0, 2).join(" / ") || "未知",
 			status,
 			rating: rate.rate ? rate.rate / 2 : undefined,
 			hours: minutes >= 30 ? Math.round((minutes / 60) * 10) / 10 : undefined,
-			platform: platforms.includes("PC") ? "PC" : platforms[0],
-			year,
+			platform: facts.platforms.includes("PC") ? "PC" : facts.platforms[0],
+			year: facts.year,
 			cover: coverPath,
-			description: intro || `Hikarinagi 记录：${STATUS_LABEL[rate.status] ?? rate.status}。`,
+			description: facts.intro || `Hikarinagi 记录：${STATUS_LABEL[rate.status] ?? rate.status}。`,
 			link: `https://www.hikarinagi.org/galgames/${id}`,
 			activity: rate.last_activity_at ?? "",
 		});
-		console.log(`   [${index + 1}/${rates.length}] ${name.slice(0, 28)} · ${status} · ${year}`);
+		console.log(`   [${index + 1}/${rates.length}] ${name.slice(0, 28)} · ${status}`);
 	}
+
+	// 缓存只保留仍在列表里的作品，避免删条目后缓存无限增长
+	for (const id of Object.keys(cache.works)) {
+		if (!rates.some((rate) => String(rate.id) === id)) delete cache.works[id];
+	}
+	writeCache(cache);
 
 	games.sort((a, b) => {
 		const byStatus = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];

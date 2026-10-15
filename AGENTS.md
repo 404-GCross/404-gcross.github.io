@@ -22,7 +22,7 @@
 | `shirones/content/posts/` | 文章 |
 | `shirones/content/moments/` | 日记目录（本站已关闭日记，仅留占位） |
 | `shirones/content/spec/about.md` | 「关于」页内容 |
-| `scripts/sync-hikarinagi.mjs` | 从 Hikarinagi 同步 Galgame 记录，生成 `shirones/config/data/games.ts` 与游戏封面 |
+| `scripts/sync-hikarinagi.mjs` | 从 Hikarinagi 同步 Galgame 记录，生成 `shirones/config/data/games.ts` 与游戏封面（作品事实缓存 `scripts/cache/hikarinagi.json` 随仓库提交） |
 | `src/pages/privacy.astro` | 站点自有的「隐私说明」页（主题没有此页） |
 | `src/pages/games.astro` | 覆盖主题的游戏页：只补一行 Hikarinagi 署名（来源标注是对方的硬性要求） |
 | `src/components/` | 覆盖主题组件的目录：`system/ConfigCarrier.astro`（挂载 Clarity + 站点级样式微调）、`molecules/SiteStats.astro`（关闭日记后隐藏「动态」统计行）、`organisms/Profile.astro`（让社交链接支持自备图片 logo） |
@@ -54,14 +54,18 @@
   `.games-section__grid` 的列宽从 20rem 收到 10.5rem（变成封面墙）。改这两条就够了，
   别去覆盖主题的 GameCard 组件。
 - **游戏页**（`/games/`）的数据由脚本同步，**别手改 `shirones/config/data/games.ts`**：
-  `scripts/sync-hikarinagi.mjs` 拉 Hikarinagi 的状态与评分记录（走站内接口 `/api/v3/user/…`，
-  必须直连——被标记的代理出口会吃 Cloudflare 挑战），竖版封面优先，只有横版图时在本地
-  合成为 600×900 的竖版图，落到 `public/images/games/<作品ID>.webp`。重跑：
-  `node scripts/sync-hikarinagi.mjs`（已有封面跳过下载，`--refresh` 强制重取）。
-  `.github/workflows/sync-games.yml` 每天北京时间 04:00 跑一次，只在数据有变化时提交。
-  两条不能丢的约定：卡片外链指向作品在 Hikarinagi 的页面、页面保留署名行（对方开放接口的
-  品牌与署名要求）。状态映射：在玩→`playing`、已通关→`completed`、搁置/弃坑→`backlog`、
-  想玩→`wishlist`。
+  `scripts/sync-hikarinagi.mjs` 拉 Hikarinagi 的状态与评分记录（站内接口 `/api/v3/user/…`），
+  竖版封面优先，只有横版图时在本地合成为 600×900 的竖版图，落到 `public/images/games/<作品ID>.webp`；
+  作品事实缓存在 `scripts/cache/hikarinagi.json`（随仓库提交，所以每日同步只需取记录列表 + 新增作品）。
+  重跑：`node scripts/sync-hikarinagi.mjs`（`--refresh` 强制重取）。
+  **取数通道有个坑**：Hikarinagi 对数据中心 IP 一律发 Cloudflare 挑战——GitHub runner、代理出口、
+  连 Cloudflare Pages Functions 自己的出口都实测 403（Just a moment），住宅网络直连才通；
+  官方开放 API（`api.hikarinagi.org`）同样在挑战后面，换过去也解决不了。所以脚本是
+  「直连优先，被挑战就改走 `r.jina.ai` 读正文」，而封面走的 `imagesp.yurari.moe` 不在挑战后面、
+  CI 可直连。`.github/workflows/sync-games.yml` 每天北京时间 04:00 跑一次（runner 要临时装
+  ImageMagick 才有 `convert`），只在数据有变化时提交。两条不能丢的约定：卡片外链指向作品在
+  Hikarinagi 的页面、页面保留署名行（对方的品牌与署名要求）。状态映射：在玩→`playing`、
+  已通关→`completed`、搁置/弃坑→`backlog`、想玩→`wishlist`。
 - **侧栏「运行天数」**不用主题的 `stats.days`（它以最早一篇文章的发布日为起点，且构建时写死），
   而是读 `shirones/config/siteConfig.ts` 里本地扩展的 `siteStartDate`（主题类型没有这个字段，
   消费侧断言取用），按站点时区 `timeZone` 的自然日算「第 N 天」；覆盖版

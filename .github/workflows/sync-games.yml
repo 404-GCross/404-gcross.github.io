@@ -26,16 +26,13 @@ jobs:
         with:
           node-version: "22"
 
-      # 站点前有 Cloudflare 挑战（按 IP 信誉判定），先确认 runner 能过再跑同步，
-      # 失败时这里会给出可读的状态码，而不是等到脚本里报错。
-      - name: Check Hikarinagi reachability
-        run: |
-          convert -version | head -1
-          code=$(curl -s -o /tmp/hikari.json -w "%{http_code}" -A "Mozilla/5.0" \
-            "https://www.hikarinagi.org/api/v3/user/45540/statistics")
-          echo "Hikarinagi HTTP $code: $(head -c 160 /tmp/hikari.json)"
-          test "$code" = "200"
+      # runner 上没有 ImageMagick（实测 convert: command not found），封面合成要用；
+      # 已有封面会被脚本跳过，实际只有新增作品才用得到。
+      - name: Install ImageMagick
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq imagemagick
 
+      # Hikarinagi 对数据中心 IP 一律发 Cloudflare 挑战，脚本会直连失败后
+      # 改走 r.jina.ai 取正文；这里不预设通道，只看结果。
       - name: Sync records
         run: node scripts/sync-hikarinagi.mjs
 
@@ -43,7 +40,7 @@ jobs:
         run: |
           git config user.name "GCross"
           git config user.email "176783842+404-GCross@users.noreply.github.com"
-          git add shirones/config/data/games.ts public/images/games
+          git add shirones/config/data/games.ts public/images/games scripts/cache/hikarinagi.json
           if git diff --cached --quiet; then
             echo "记录没有变化，跳过提交"
             exit 0
