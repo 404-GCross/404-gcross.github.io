@@ -42,8 +42,8 @@ const pageDescription = "本站如何处理与你有关的信息";
 
 				<h3>4. 音乐播放器：第三方接口</h3>
 				<ul>
-					<li>播放器<strong>不会自动播放</strong>。只有你主动点击播放时，才会向第三方 Meting 接口请求数据，并因此把你的 IP、User-Agent 发送给该服务。</li>
-					<li>当前接口为第三方公共实例 <code>https://meting.mysqil.com/</code>，<strong>并非本站自建</strong>，音频文件由网易云音乐的服务器提供。</li>
+					<li>播放器<strong>不会自动播放</strong>。侧栏进入视口时会预取歌单<strong>元数据</strong>（歌名、歌手、封面，不含音频流）；只有你主动点击播放时，才会请求音频流。两种情况都会向第三方 Meting 接口发出请求，并因此把你的 IP、User-Agent 发送给该服务。</li>
+					<li>当前接口为主题自带的第三方公共实例 <code>https://api.injahow.cn/meting/</code>，<strong>并非本站自建</strong>，音频文件由网易云音乐的服务器提供。</li>
 					<li>如果你不使用播放器，就不会有任何请求发出。</li>
 				</ul>
 
