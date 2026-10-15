@@ -5,6 +5,14 @@ on:
     # UTC 20:00 = 北京时间次日 04:00
     - cron: "0 20 * * *"
   workflow_dispatch:
+    inputs:
+      fetch:
+        description: "取数通道：auto=直连→curl_cffi→reader；browser=强制用真浏览器（验兜底）"
+        type: choice
+        options:
+          - auto
+          - browser
+        default: auto
 
 permissions:
   contents: write
@@ -41,6 +49,13 @@ jobs:
       # 日常不装、不跑。
       - name: Sync records
         run: |
+          if [ "${{ inputs.fetch }}" = "browser" ]; then
+            echo "强制使用真浏览器兜底通道"
+            npm install --no-save --no-fund --no-audit playwright
+            npx playwright install chromium
+            HIKARINAGI_FETCH_CMD="node scripts/fetch-via-browser.mjs" node scripts/sync-hikarinagi.mjs
+            exit 0
+          fi
           export HIKARINAGI_FETCH_CMD="python3 scripts/fetch-impersonate.py"
           if node scripts/sync-hikarinagi.mjs; then
             exit 0
